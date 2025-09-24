@@ -14,7 +14,230 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mobiles: {
+        Row: {
+          brand: string
+          condition: Database["public"]["Enums"]["mobile_condition"]
+          created_at: string
+          id: string
+          imei: string | null
+          is_sold: boolean
+          model: string
+          notes: string | null
+          purchase_date: string | null
+          purchase_price: number | null
+          selling_price: number | null
+          supplier_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand: string
+          condition?: Database["public"]["Enums"]["mobile_condition"]
+          created_at?: string
+          id?: string
+          imei?: string | null
+          is_sold?: boolean
+          model: string
+          notes?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          selling_price?: number | null
+          supplier_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand?: string
+          condition?: Database["public"]["Enums"]["mobile_condition"]
+          created_at?: string
+          id?: string
+          imei?: string | null
+          is_sold?: boolean
+          model?: string
+          notes?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          selling_price?: number | null
+          supplier_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          business_name: string | null
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          subscription_expires_at: string | null
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          business_name?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          subscription_expires_at?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          business_name?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          subscription_expires_at?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          created_at: string
+          id: string
+          mobile_id: string
+          notes: string | null
+          purchase_date: string
+          purchase_price: number
+          supplier_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mobile_id: string
+          notes?: string | null
+          purchase_date?: string
+          purchase_price: number
+          supplier_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mobile_id?: string
+          notes?: string | null
+          purchase_date?: string
+          purchase_price?: number
+          supplier_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_mobile_id_fkey"
+            columns: ["mobile_id"]
+            isOneToOne: false
+            referencedRelation: "mobiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          mobile_id: string
+          notes: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          sale_date: string
+          sale_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          mobile_id: string
+          notes?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          sale_date?: string
+          sale_price: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          mobile_id?: string
+          notes?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          sale_date?: string
+          sale_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_mobile_id_fkey"
+            columns: ["mobile_id"]
+            isOneToOne: false
+            referencedRelation: "mobiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +246,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      mobile_condition: "new" | "excellent" | "good" | "fair" | "poor"
+      payment_status: "pending" | "paid" | "partial" | "cancelled"
+      subscription_tier: "basic" | "standard" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +375,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      mobile_condition: ["new", "excellent", "good", "fair", "poor"],
+      payment_status: ["pending", "paid", "partial", "cancelled"],
+      subscription_tier: ["basic", "standard", "premium"],
+    },
   },
 } as const
