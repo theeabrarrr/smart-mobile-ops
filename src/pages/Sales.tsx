@@ -243,7 +243,7 @@ export default function Sales() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Sales</h1>
           <p className="text-muted-foreground mt-1">
-            Total Sales: ₹{totalSales.toLocaleString()} | Records: {sales.length}
+            Total Sales: PKR {totalSales.toLocaleString()} | Records: {sales.length}
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -268,7 +268,7 @@ export default function Sales() {
                     {availableMobiles.map((mobile) => (
                       <SelectItem key={mobile.id} value={mobile.id}>
                         {mobile.brand} {mobile.model}
-                        {mobile.selling_price && ` - ₹${mobile.selling_price}`}
+                        {mobile.selling_price && ` - PKR ${mobile.selling_price}`}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -345,7 +345,7 @@ export default function Sales() {
               <CardTitle className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
-                  <span>₹{sale.sale_price.toLocaleString()}</span>
+                  <span>PKR {sale.sale_price.toLocaleString()}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button

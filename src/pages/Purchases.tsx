@@ -41,6 +41,8 @@ export default function Purchases() {
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
   const [formData, setFormData] = useState({
     mobile_id: '',
+    brand: '',
+    model: '',
     purchase_price: '',
     purchase_date: new Date().toISOString().split('T')[0],
     supplier_name: '',
@@ -95,8 +97,31 @@ export default function Purchases() {
     e.preventDefault();
     
     try {
+      // First create/add mobile to inventory if it doesn't exist
+      let mobileId = formData.mobile_id;
+      
+      if (!mobileId && (formData.brand || formData.model)) {
+        const { data: newMobile, error: mobileError } = await supabase
+          .from('mobiles')
+          .insert([{
+            brand: formData.brand,
+            model: formData.model,
+            user_id: user?.id,
+            condition: 'good',
+            purchase_price: parseFloat(formData.purchase_price),
+            purchase_date: formData.purchase_date,
+            supplier_name: formData.supplier_name,
+            notes: formData.notes || null
+          }])
+          .select()
+          .single();
+        
+        if (mobileError) throw mobileError;
+        mobileId = newMobile.id;
+      }
+
       const purchaseData = {
-        mobile_id: formData.mobile_id,
+        mobile_id: mobileId,
         purchase_price: parseFloat(formData.purchase_price),
         purchase_date: formData.purchase_date,
         supplier_name: formData.supplier_name,
@@ -156,6 +181,8 @@ export default function Purchases() {
   const resetForm = () => {
     setFormData({
       mobile_id: '',
+      brand: '',
+      model: '',
       purchase_price: '',
       purchase_date: new Date().toISOString().split('T')[0],
       supplier_name: '',
@@ -168,6 +195,8 @@ export default function Purchases() {
     setEditingPurchase(purchase);
     setFormData({
       mobile_id: purchase.mobile_id,
+      brand: purchase.mobiles.brand,
+      model: purchase.mobiles.model,
       purchase_price: purchase.purchase_price.toString(),
       purchase_date: purchase.purchase_date,
       supplier_name: purchase.supplier_name,
@@ -186,7 +215,7 @@ export default function Purchases() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Purchases</h1>
           <p className="text-muted-foreground mt-1">
-            Total Spent: ₹{totalPurchases.toLocaleString()} | Records: {purchases.length}
+            Total Spent: PKR {totalPurchases.toLocaleString()} | Records: {purchases.length}
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -201,11 +230,41 @@ export default function Purchases() {
               <DialogTitle>{editingPurchase ? 'Edit Purchase' : 'Record New Purchase'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="brand">Mobile Brand *</Label>
+                  <Input
+                    id="brand"
+                    value={formData.brand}
+                    onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                    placeholder="e.g., Samsung, iPhone"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="model">Model *</Label>
+                  <Input
+                    id="model"
+                    value={formData.model}
+                    onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                    placeholder="e.g., Galaxy S24, iPhone 15"
+                    required
+                  />
+                </div>
+              </div>
               <div>
-                <Label htmlFor="mobile_id">Mobile *</Label>
-                <Select value={formData.mobile_id} onValueChange={(value) => setFormData({ ...formData, mobile_id: value })} required>
+                <Label htmlFor="mobile_id">Or Select Existing Mobile</Label>
+                <Select value={formData.mobile_id} onValueChange={(value) => {
+                  const selectedMobile = mobiles.find(m => m.id === value);
+                  setFormData({ 
+                    ...formData, 
+                    mobile_id: value,
+                    brand: selectedMobile?.brand || '',
+                    model: selectedMobile?.model || ''
+                  });
+                }}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select mobile" />
+                    <SelectValue placeholder="Optional: Select existing mobile" />
                   </SelectTrigger>
                   <SelectContent>
                     {mobiles.map((mobile) => (
@@ -268,7 +327,7 @@ export default function Purchases() {
               <CardTitle className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5" />
-                  <span>₹{purchase.purchase_price.toLocaleString()}</span>
+                  <span>PKR {purchase.purchase_price.toLocaleString()}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button

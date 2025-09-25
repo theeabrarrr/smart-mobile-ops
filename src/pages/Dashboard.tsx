@@ -44,12 +44,29 @@ const Dashboard = () => {
       .from('profiles')
       .select('*')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Error fetching profile:', error);
-    } else {
+    } else if (data) {
       setProfile(data);
+    } else {
+      // Create profile if it doesn't exist
+      const { data: newProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert([{
+          user_id: user.id,
+          full_name: user.email || 'User',
+          subscription_tier: 'basic'
+        }])
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error('Error creating profile:', insertError);
+      } else {
+        setProfile(newProfile);
+      }
     }
   };
 
@@ -63,11 +80,12 @@ const Dashboard = () => {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id);
 
-      // Fetch mobiles count
+      // Fetch mobiles count (available only)
       const { count: mobilesCount } = await supabase
         .from('mobiles')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .eq('is_sold', false);
 
       // Fetch sales count and revenue
       const { data: salesData } = await supabase
@@ -151,7 +169,7 @@ const Dashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalMobiles}</div>
             <p className="text-xs text-muted-foreground">
-              Devices in stock
+              Available in stock
             </p>
           </CardContent>
         </Card>
@@ -175,7 +193,7 @@ const Dashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">PKR {stats.totalRevenue.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               Total earnings
             </p>

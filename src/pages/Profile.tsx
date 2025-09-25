@@ -37,7 +37,7 @@ const subscriptionPlans = [
   {
     tier: 'standard',
     name: 'Standard',
-    price: '₹799',
+    price: 'PKR 799',
     features: [
       'Everything in Basic',
       'Advanced Reports',
@@ -49,7 +49,7 @@ const subscriptionPlans = [
   {
     tier: 'premium',
     name: 'Premium',
-    price: '₹1499',
+    price: 'PKR 1,499',
     features: [
       'Everything in Standard',
       'AI Assistant',
@@ -87,9 +87,9 @@ export default function Profile() {
         .from('profiles')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
       
       if (data) {
         setProfile(data);

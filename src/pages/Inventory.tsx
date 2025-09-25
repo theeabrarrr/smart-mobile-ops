@@ -330,10 +330,10 @@ export default function Inventory() {
                   <p><strong>IMEI:</strong> {mobile.imei}</p>
                 )}
                 {mobile.purchase_price && (
-                  <p><strong>Purchase:</strong> ₹{mobile.purchase_price}</p>
+                  <p><strong>Purchase:</strong> PKR {mobile.purchase_price}</p>
                 )}
                 {mobile.selling_price && (
-                  <p><strong>Selling:</strong> ₹{mobile.selling_price}</p>
+                  <p><strong>Selling:</strong> PKR {mobile.selling_price}</p>
                 )}
                 {mobile.supplier_name && (
                   <p><strong>Supplier:</strong> {mobile.supplier_name}</p>

@@ -146,7 +146,7 @@ export default function Reports() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">₹{reportData.totalSales.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-green-600">PKR {reportData.totalSales.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Revenue generated</p>
           </CardContent>
         </Card>
@@ -157,7 +157,7 @@ export default function Reports() {
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">₹{reportData.totalPurchases.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-red-600">PKR {reportData.totalPurchases.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Money spent</p>
           </CardContent>
         </Card>
@@ -169,7 +169,7 @@ export default function Reports() {
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${reportData.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ₹{reportData.totalProfit.toLocaleString()}
+              PKR {reportData.totalProfit.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
               {reportData.totalProfit >= 0 ? 'Profit' : 'Loss'}
@@ -244,7 +244,7 @@ export default function Reports() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-green-600">₹{sale.sale_price.toLocaleString()}</p>
+                      <p className="font-bold text-green-600">PKR {sale.sale_price.toLocaleString()}</p>
                     </div>
                   </div>
                 ))

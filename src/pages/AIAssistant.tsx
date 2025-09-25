@@ -1,99 +1,309 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bot, Sparkles, TrendingUp, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Bot, Send, Sparkles, TrendingUp, Smartphone, Users } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface BusinessStats {
+  totalSales: number;
+  totalPurchases: number;
+  profit: number;
+  availableInventory: number;
+  totalCustomers: number;
+}
 
 export default function AIAssistant() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [messages, setMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [businessStats, setBusinessStats] = useState<BusinessStats>({
+    totalSales: 0,
+    totalPurchases: 0,
+    profit: 0,
+    availableInventory: 0,
+    totalCustomers: 0
+  });
+
+  useEffect(() => {
+    if (user) {
+      fetchBusinessStats();
+    }
+  }, [user]);
+
+  const fetchBusinessStats = async () => {
+    try {
+      // Fetch sales data
+      const { data: salesData } = await supabase
+        .from('sales')
+        .select('sale_price')
+        .eq('user_id', user?.id);
+
+      // Fetch purchases data
+      const { data: purchasesData } = await supabase
+        .from('purchases')
+        .select('purchase_price')
+        .eq('user_id', user?.id);
+
+      // Fetch inventory count
+      const { count: inventoryCount } = await supabase
+        .from('mobiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .eq('is_sold', false);
+
+      // Fetch customers count
+      const { count: customersCount } = await supabase
+        .from('customers')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id);
+
+      const totalSales = salesData?.reduce((sum, sale) => sum + Number(sale.sale_price), 0) || 0;
+      const totalPurchases = purchasesData?.reduce((sum, purchase) => sum + Number(purchase.purchase_price), 0) || 0;
+      const profit = totalSales - totalPurchases;
+
+      setBusinessStats({
+        totalSales,
+        totalPurchases,
+        profit,
+        availableInventory: inventoryCount || 0,
+        totalCustomers: customersCount || 0
+      });
+    } catch (error) {
+      console.error('Error fetching business stats:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const userMessage = input.trim();
+    setInput('');
+    setLoading(true);
+
+    // Add user message
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('gemini-assistant', {
+        body: { 
+          prompt: userMessage,
+          businessData: businessStats
+        }
+      });
+
+      if (error) throw error;
+
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: data.response || 'Sorry, I could not generate a response. Please try again.' 
+      }]);
+    } catch (error) {
+      console.error('Error calling AI assistant:', error);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Sorry, I encountered an error while processing your request. Please make sure the Gemini API is properly configured and try again.' 
+      }]);
+      
+      toast({
+        title: "AI Assistant Error",
+        description: "Failed to get AI response. Please check your API configuration.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Bot className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold text-foreground">AI Assistant</h1>
-        <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-          <Sparkles className="h-3 w-3 mr-1" />
-          Premium Feature
-        </Badge>
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+          <Bot className="h-8 w-8" />
+          AI Business Assistant
+        </h1>
+        <p className="text-muted-foreground mt-1">Get AI-powered insights and predictions for your mobile business</p>
       </div>
 
-      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-6 w-6 text-purple-600" />
-            Smart Business Insights
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-muted-foreground">
-              Your AI Assistant analyzes your sales data and provides intelligent insights to help grow your mobile business.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-white rounded-lg border">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  <h3 className="font-semibold">Sales Predictions</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Get AI-powered forecasts for your best-selling models and optimal pricing strategies.
-                </p>
+      {/* Business Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              <div>
+                <p className="text-sm font-medium">Sales</p>
+                <p className="text-lg font-bold">PKR {businessStats.totalSales.toLocaleString()}</p>
               </div>
-
-              <div className="p-4 bg-white rounded-lg border">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertCircle className="h-5 w-5 text-orange-600" />
-                  <h3 className="font-semibold">Inventory Alerts</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Receive smart notifications about slow-moving stock and reorder recommendations.
-                </p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-red-500" />
+              <div>
+                <p className="text-sm font-medium">Purchases</p>
+                <p className="text-lg font-bold">PKR {businessStats.totalPurchases.toLocaleString()}</p>
               </div>
-
-              <div className="p-4 bg-white rounded-lg border">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-semibold">Market Insights</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Stay updated with market trends and competitor analysis for better decision making.
-                </p>
-              </div>
-
-              <div className="p-4 bg-white rounded-lg border">
-                <div className="flex items-center gap-2 mb-2">
-                  <Bot className="h-5 w-5 text-purple-600" />
-                  <h3 className="font-semibold">Chat Support</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Ask questions about your business data and get instant, intelligent responses.
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-blue-500" />
+              <div>
+                <p className="text-sm font-medium">Profit</p>
+                <p className={`text-lg font-bold ${businessStats.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  PKR {businessStats.profit.toLocaleString()}
                 </p>
               </div>
             </div>
-
-            <div className="mt-6 p-4 bg-purple-100 rounded-lg border border-purple-200">
-              <h3 className="font-semibold text-purple-800 mb-2">Coming Soon in Premium</h3>
-              <ul className="space-y-1 text-sm text-purple-700">
-                <li>• Personalized business recommendations</li>
-                <li>• Automated report generation</li>
-                <li>• Advanced analytics and insights</li>
-                <li>• 24/7 AI business consultant</li>
-              </ul>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Smartphone className="h-4 w-4 text-purple-500" />
+              <div>
+                <p className="text-sm font-medium">Inventory</p>
+                <p className="text-lg font-bold">{businessStats.availableInventory}</p>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-orange-500" />
+              <div>
+                <p className="text-sm font-medium">Customers</p>
+                <p className="text-lg font-bold">{businessStats.totalCustomers}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card>
-        <CardContent className="p-6 text-center">
-          <Bot className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">Upgrade to Premium</h3>
-          <p className="text-muted-foreground mb-4">
-            Unlock powerful AI features to supercharge your mobile business with intelligent insights and automation.
-          </p>
-          <Badge variant="outline" className="text-purple-600 border-purple-200">
-            Available with Premium Plan
-          </Badge>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Suggested Questions */}
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <CardTitle className="text-lg">Quick Questions</CardTitle>
+            <CardDescription>Click to ask</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3" 
+                    onClick={() => setInput('What are my top selling mobile models and which ones should I focus on?')}>
+              Top selling models
+            </Button>
+            <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
+                    onClick={() => setInput('How can I improve my profit margins? What pricing strategies should I use?')}>
+              Improve profit margins
+            </Button>
+            <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
+                    onClick={() => setInput('What inventory should I stock next month based on my sales data?')}>
+              Inventory predictions
+            </Button>
+            <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
+                    onClick={() => setInput('Analyze my sales trends and business performance. Give me insights.')}>
+              Business analysis
+            </Button>
+            <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
+                    onClick={() => setInput('What are the best practices for mobile phone retail business?')}>
+              Business tips
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Chat Interface */}
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              AI Business Intelligence Chat
+            </CardTitle>
+            <Badge variant="secondary">Powered by Google Gemini</Badge>
+          </CardHeader>
+          <CardContent>
+            {/* Messages */}
+            <div className="space-y-4 h-96 overflow-y-auto mb-4 p-4 border rounded-lg">
+              {messages.length === 0 && (
+                <div className="text-center text-muted-foreground">
+                  <Bot className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>Ask me anything about your mobile business!</p>
+                  <p className="text-sm mt-2">I can analyze your data and provide insights on sales, inventory, profits, and business strategy.</p>
+                </div>
+              )}
+              {messages.map((message, index) => (
+                <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] p-3 rounded-lg whitespace-pre-wrap ${
+                    message.role === 'user' 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-muted'
+                  }`}>
+                    {message.content}
+                  </div>
+                </div>
+              ))}
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="bg-muted p-3 rounded-lg">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Input Form */}
+            <form onSubmit={handleSubmit} className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask about your business metrics, trends, or get recommendations..."
+                disabled={loading}
+                className="flex-1"
+              />
+              <Button type="submit" disabled={loading || !input.trim()}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Features */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="font-semibold mb-2">📊 Business Analytics</h3>
+            <p className="text-sm text-muted-foreground">Get insights on sales trends, profit margins, and performance metrics</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="font-semibold mb-2">📱 Inventory Optimization</h3>
+            <p className="text-sm text-muted-foreground">AI-powered recommendations for stock management and purchasing</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="font-semibold mb-2">🎯 Market Predictions</h3>
+            <p className="text-sm text-muted-foreground">Forecast demand and identify growth opportunities</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
