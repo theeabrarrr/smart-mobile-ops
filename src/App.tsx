@@ -7,6 +7,13 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Customers from "./pages/Customers";
+import Inventory from "./pages/Inventory";
+import Sales from "./pages/Sales";
+import Purchases from "./pages/Purchases";
+import Reports from "./pages/Reports";
+import AIAssistant from "./pages/AIAssistant";
+import Profile from "./pages/Profile";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +32,41 @@ const App = () => (
             <Route path="/dashboard" element={
               <DashboardLayout>
                 <Dashboard />
+              </DashboardLayout>
+            } />
+            <Route path="/customers" element={
+              <DashboardLayout>
+                <Customers />
+              </DashboardLayout>
+            } />
+            <Route path="/inventory" element={
+              <DashboardLayout>
+                <Inventory />
+              </DashboardLayout>
+            } />
+            <Route path="/sales" element={
+              <DashboardLayout>
+                <Sales />
+              </DashboardLayout>
+            } />
+            <Route path="/purchases" element={
+              <DashboardLayout>
+                <Purchases />
+              </DashboardLayout>
+            } />
+            <Route path="/reports" element={
+              <DashboardLayout>
+                <Reports />
+              </DashboardLayout>
+            } />
+            <Route path="/ai-assistant" element={
+              <DashboardLayout>
+                <AIAssistant />
+              </DashboardLayout>
+            } />
+            <Route path="/profile" element={
+              <DashboardLayout>
+                <Profile />
               </DashboardLayout>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
