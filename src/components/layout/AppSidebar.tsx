@@ -127,11 +127,11 @@ export const AppSidebar = () => {
   };
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-2">
           <Smartphone className="h-8 w-8 text-sidebar-primary" />
-          <div>
+          <div className="group-data-[collapsible=icon]:hidden">
             <h2 className="text-lg font-semibold text-sidebar-foreground">MobileSales Pro</h2>
             <Badge 
               className={`${getTierColor(profile?.subscription_tier || 'basic')} text-white text-xs`}
@@ -140,7 +140,6 @@ export const AppSidebar = () => {
             </Badge>
           </div>
         </div>
-        <SidebarTrigger className="ml-auto" />
       </SidebarHeader>
 
       <SidebarContent>
@@ -154,11 +153,12 @@ export const AppSidebar = () => {
                 <SidebarMenuButton
                   onClick={() => hasAccess ? navigate(item.path) : navigate('/profile')}
                   className={`${isActive ? 'bg-sidebar-accent' : ''} ${!hasAccess ? 'opacity-50' : ''}`}
+                  tooltip={item.title}
                 >
                   <item.icon className="h-4 w-4" />
-                  <span>{item.title}</span>
+                  <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                   {!hasAccess && (
-                    <Crown className="h-3 w-3 ml-auto text-yellow-500" />
+                    <Crown className="h-3 w-3 ml-auto text-yellow-500 group-data-[collapsible=icon]:hidden" />
                   )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -170,15 +170,15 @@ export const AppSidebar = () => {
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => navigate('/profile')}>
+            <SidebarMenuButton onClick={() => navigate('/profile')} tooltip="Profile">
               <User className="h-4 w-4" />
-              <span>Profile</span>
+              <span className="group-data-[collapsible=icon]:hidden">Profile</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleSignOut}>
+            <SidebarMenuButton onClick={handleSignOut} tooltip="Sign Out">
               <LogOut className="h-4 w-4" />
-              <span>Sign Out</span>
+              <span className="group-data-[collapsible=icon]:hidden">Sign Out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
