@@ -22,6 +22,7 @@ export default function AIAssistant() {
   const [messages, setMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userSubscriptionTier, setUserSubscriptionTier] = useState('basic');
   const [businessStats, setBusinessStats] = useState<BusinessStats>({
     totalSales: 0,
     totalPurchases: 0,
@@ -33,8 +34,25 @@ export default function AIAssistant() {
   useEffect(() => {
     if (user) {
       fetchBusinessStats();
+      fetchUserSubscription();
     }
   }, [user]);
+
+  const fetchUserSubscription = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('user_id', user?.id)
+        .single();
+      
+      if (data) {
+        setUserSubscriptionTier(data.subscription_tier || 'basic');
+      }
+    } catch (error) {
+      console.error('Error fetching user subscription:', error);
+    }
+  };
 
   const fetchBusinessStats = async () => {
     try {
@@ -83,6 +101,16 @@ export default function AIAssistant() {
     e.preventDefault();
     if (!input.trim()) return;
 
+    // Check subscription for premium features
+    if (userSubscriptionTier !== 'premium') {
+      toast({
+        title: "Premium Feature",
+        description: "AI Assistant is available for Premium plan users only. Please upgrade your subscription.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const userMessage = input.trim();
     setInput('');
     setLoading(true);
@@ -94,7 +122,9 @@ export default function AIAssistant() {
       const { data, error } = await supabase.functions.invoke('gemini-assistant', {
         body: { 
           prompt: userMessage,
-          businessData: businessStats
+          businessData: businessStats,
+          subscriptionTier: userSubscriptionTier,
+          supportRomanUrdu: true
         }
       });
 
@@ -127,8 +157,16 @@ export default function AIAssistant() {
         <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
           <Bot className="h-8 w-8" />
           AI Business Assistant
+          {userSubscriptionTier === 'premium' && (
+            <Badge variant="secondary" className="ml-2">Roman Urdu Support</Badge>
+          )}
         </h1>
-        <p className="text-muted-foreground mt-1">Get AI-powered insights and predictions for your mobile business</p>
+        <p className="text-muted-foreground mt-1">
+          {userSubscriptionTier === 'premium' 
+            ? "Get AI-powered insights in English and Roman Urdu for your mobile business"
+            : "AI Assistant is available for Premium plan users only"
+          }
+        </p>
       </div>
 
       {/* Business Overview Cards */}
@@ -201,24 +239,29 @@ export default function AIAssistant() {
           </CardHeader>
           <CardContent className="space-y-2">
             <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3" 
+                    disabled={userSubscriptionTier !== 'premium'}
                     onClick={() => setInput('What are my top selling mobile models and which ones should I focus on?')}>
               Top selling models
             </Button>
             <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
+                    disabled={userSubscriptionTier !== 'premium'}
                     onClick={() => setInput('How can I improve my profit margins? What pricing strategies should I use?')}>
               Improve profit margins
             </Button>
             <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
+                    disabled={userSubscriptionTier !== 'premium'}
                     onClick={() => setInput('What inventory should I stock next month based on my sales data?')}>
               Inventory predictions
             </Button>
             <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
+                    disabled={userSubscriptionTier !== 'premium'}
                     onClick={() => setInput('Analyze my sales trends and business performance. Give me insights.')}>
               Business analysis
             </Button>
             <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
-                    onClick={() => setInput('What are the best practices for mobile phone retail business?')}>
-              Business tips
+                    disabled={userSubscriptionTier !== 'premium'}
+                    onClick={() => setInput('Mujhe apne business ke liye Roman Urdu mein tips chahiye')}>
+              Roman Urdu Business Tips
             </Button>
           </CardContent>
         </Card>
@@ -271,11 +314,14 @@ export default function AIAssistant() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about your business metrics, trends, or get recommendations..."
-                disabled={loading}
+                placeholder={userSubscriptionTier === 'premium' 
+                  ? "Ask in English or Roman Urdu about your business..." 
+                  : "Upgrade to Premium to use AI Assistant..."
+                }
+                disabled={loading || userSubscriptionTier !== 'premium'}
                 className="flex-1"
               />
-              <Button type="submit" disabled={loading || !input.trim()}>
+              <Button type="submit" disabled={loading || !input.trim() || userSubscriptionTier !== 'premium'}>
                 <Send className="h-4 w-4" />
               </Button>
             </form>

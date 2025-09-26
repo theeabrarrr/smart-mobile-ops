@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -54,11 +56,14 @@ export default function Sales() {
   const [formData, setFormData] = useState({
     mobile_id: '',
     customer_id: '',
+    customer_name: '',
     sale_price: '',
     sale_date: new Date().toISOString().split('T')[0],
     payment_status: 'pending',
     notes: ''
   });
+  const [isCustomerPopoverOpen, setIsCustomerPopoverOpen] = useState(false);
+  const [newCustomerName, setNewCustomerName] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -121,13 +126,52 @@ export default function Sales() {
     }
   };
 
+  const createNewCustomer = async (customerName: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .insert([{
+          name: customerName.trim(),
+          user_id: user?.id
+        }])
+        .select()
+        .single();
+        
+      if (error) throw error;
+      
+      // Update customers list
+      await fetchCustomers();
+      
+      return data.id;
+    } catch (error) {
+      console.error('Error creating customer:', error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
+      let customerId = formData.customer_id;
+      
+      // If no customer_id but we have a customer_name, create new customer
+      if (!customerId && formData.customer_name.trim()) {
+        customerId = await createNewCustomer(formData.customer_name);
+      }
+      
+      if (!customerId) {
+        toast({
+          title: "Error",
+          description: "Please select or enter a customer name",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       const saleData = {
         mobile_id: formData.mobile_id,
-        customer_id: formData.customer_id,
+        customer_id: customerId,
         sale_price: parseFloat(formData.sale_price),
         sale_date: formData.sale_date,
         payment_status: formData.payment_status as 'pending' | 'paid' | 'partial' | 'cancelled',
@@ -203,12 +247,15 @@ export default function Sales() {
     setFormData({
       mobile_id: '',
       customer_id: '',
+      customer_name: '',
       sale_price: '',
       sale_date: new Date().toISOString().split('T')[0],
       payment_status: 'pending',
       notes: ''
     });
     setEditingSale(null);
+    setNewCustomerName('');
+    setIsCustomerPopoverOpen(false);
   };
 
   const openEditDialog = (sale: Sale) => {
@@ -216,6 +263,7 @@ export default function Sales() {
     setFormData({
       mobile_id: sale.mobile_id,
       customer_id: sale.customer_id,
+      customer_name: '',
       sale_price: sale.sale_price.toString(),
       sale_date: sale.sale_date,
       payment_status: sale.payment_status,
@@ -276,18 +324,65 @@ export default function Sales() {
               </div>
               <div>
                 <Label htmlFor="customer_id">Customer *</Label>
-                <Select value={formData.customer_id} onValueChange={(value) => setFormData({ ...formData, customer_id: value })} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select customer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {customers.map((customer) => (
-                      <SelectItem key={customer.id} value={customer.id}>
-                        {customer.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={isCustomerPopoverOpen} onOpenChange={setIsCustomerPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={isCustomerPopoverOpen}
+                      className="w-full justify-between"
+                    >
+                      {formData.customer_id
+                        ? customers.find((customer) => customer.id === formData.customer_id)?.name
+                        : formData.customer_name
+                        ? formData.customer_name
+                        : "Select or add customer..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput 
+                        placeholder="Search or add new customer..." 
+                        value={newCustomerName}
+                        onValueChange={setNewCustomerName}
+                      />
+                      <CommandList>
+                        <CommandEmpty>
+                          {newCustomerName.trim() && (
+                            <div className="p-2">
+                              <Button
+                                variant="outline"
+                                className="w-full"
+                                onClick={() => {
+                                  setFormData({ ...formData, customer_id: '', customer_name: newCustomerName.trim() });
+                                  setIsCustomerPopoverOpen(false);
+                                  setNewCustomerName('');
+                                }}
+                              >
+                                Add "{newCustomerName.trim()}" as new customer
+                              </Button>
+                            </div>
+                          )}
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {customers.map((customer) => (
+                            <CommandItem
+                              key={customer.id}
+                              value={customer.name}
+                              onSelect={() => {
+                                setFormData({ ...formData, customer_id: customer.id, customer_name: '' });
+                                setIsCustomerPopoverOpen(false);
+                                setNewCustomerName('');
+                              }}
+                            >
+                              {customer.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div>
                 <Label htmlFor="sale_price">Sale Price *</Label>

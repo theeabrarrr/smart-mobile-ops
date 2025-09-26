@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { User, Crown, Check, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import CustomReports from '@/components/CustomReports';
 
 interface Profile {
   id: string;
@@ -345,6 +346,11 @@ export default function Profile() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Custom Reports for Premium Users */}
+      {profile?.subscription_tier === 'premium' && (
+        <CustomReports userSubscriptionTier={profile.subscription_tier} />
+      )}
 
       {/* Fake Payment Dialog */}
       <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>

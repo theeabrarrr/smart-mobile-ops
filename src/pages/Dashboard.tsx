@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { Users, Smartphone, ShoppingCart, TrendingUp } from 'lucide-react';
+import ExportData from '@/components/ExportData';
 
 interface Profile {
   id: string;
@@ -202,7 +203,7 @@ const Dashboard = () => {
       </div>
 
       {/* Feature Access Based on Subscription */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
@@ -217,12 +218,15 @@ const Dashboard = () => {
             <div className="text-sm">• Track purchase</div>
             {profile?.subscription_tier !== 'basic' && (
               <>
-                <div className="text-sm text-green-600">• Generate invoice (Standard+)</div>
-                <div className="text-sm text-green-600">• View monthly reports (Standard+)</div>
+                <div className="text-sm text-green-600">• Export data (Standard+)</div>
+                <div className="text-sm text-green-600">• Email support (Standard+)</div>
               </>
             )}
             {profile?.subscription_tier === 'premium' && (
-              <div className="text-sm text-purple-600">• AI Assistant & Insights (Premium)</div>
+              <>
+                <div className="text-sm text-purple-600">• AI Assistant with Roman Urdu (Premium)</div>
+                <div className="text-sm text-purple-600">• Custom reports (Premium)</div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -240,22 +244,24 @@ const Dashboard = () => {
             <div className="text-sm">✓ Sales & purchase records</div>
             {profile?.subscription_tier !== 'basic' ? (
               <>
-                <div className="text-sm text-green-600">✓ Invoice generation</div>
-                <div className="text-sm text-green-600">✓ Monthly reports</div>
+                <div className="text-sm text-green-600">✓ Data export</div>
+                <div className="text-sm text-green-600">✓ Email support</div>
               </>
             ) : (
               <>
-                <div className="text-sm text-muted-foreground">✗ Invoice generation</div>
-                <div className="text-sm text-muted-foreground">✗ Monthly reports</div>
+                <div className="text-sm text-muted-foreground">✗ Data export</div>
+                <div className="text-sm text-muted-foreground">✗ Email support</div>
               </>
             )}
             {profile?.subscription_tier === 'premium' ? (
-              <div className="text-sm text-purple-600">✓ AI Assistant & Predictions</div>
+              <div className="text-sm text-purple-600">✓ AI Assistant with Roman Urdu & Custom Reports</div>
             ) : (
-              <div className="text-sm text-muted-foreground">✗ AI Assistant & Predictions</div>
+              <div className="text-sm text-muted-foreground">✗ AI Assistant with Roman Urdu & Custom Reports</div>
             )}
           </CardContent>
         </Card>
+
+        <ExportData userSubscriptionTier={profile?.subscription_tier || 'basic'} />
       </div>
     </div>
   );

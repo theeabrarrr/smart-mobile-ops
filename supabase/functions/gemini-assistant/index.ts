@@ -13,15 +13,15 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, businessData } = await req.json();
+    const { prompt, businessData, subscriptionTier, supportRomanUrdu } = await req.json();
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
     if (!GEMINI_API_KEY) {
       throw new Error('GEMINI_API_KEY is not set');
     }
 
-    // Prepare context with business data
-    const context = businessData ? `
+    // Prepare context with business data and subscription features
+    let context = businessData ? `
     Business Context:
     - Total Sales: PKR ${businessData.totalSales || 0}
     - Total Purchases: PKR ${businessData.totalPurchases || 0}
@@ -31,6 +31,19 @@ serve(async (req) => {
     
     Based on this mobile phone business data, please provide insights and recommendations.
     ` : '';
+
+    // Add Roman Urdu support for Premium users
+    if (subscriptionTier === 'premium' && supportRomanUrdu) {
+      context += `
+      
+      IMPORTANT: You can understand and respond in Roman Urdu (Urdu written in English alphabet). 
+      If the user asks in Roman Urdu, respond in Roman Urdu. If they ask in English, respond in English.
+      
+      Examples:
+      - "Mera business kaisa chal raha hai?" → Respond about business performance in Roman Urdu
+      - "Sales kaise badhain?" → Give sales tips in Roman Urdu
+      `;
+    }
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
