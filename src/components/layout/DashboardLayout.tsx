@@ -6,6 +6,7 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/s
 import { Separator } from '@/components/ui/separator';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { useLocation } from 'react-router-dom';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -48,7 +49,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <AppSidebar />
         <SidebarInset>
           <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 bg-background border-b">
-            <div className="flex items-center gap-2 px-4">
+            <div className="flex items-center gap-2 px-4 flex-1">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
               <Breadcrumb>
@@ -64,6 +65,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
+            </div>
+            <div className="px-4">
+              <ThemeToggle />
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4">
