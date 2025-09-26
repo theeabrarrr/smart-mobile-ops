@@ -73,7 +73,12 @@ serve(async (req) => {
     );
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
+      const errorBody = await response.text();
+      console.error('Gemini API non-OK response:', response.status, errorBody);
+      return new Response(
+        JSON.stringify({ error: 'Gemini API request failed', status: response.status, detail: errorBody }),
+        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const data = await response.json();
