@@ -14,75 +14,75 @@ serve(async (req) => {
 
   try {
     const { prompt, businessData, subscriptionTier, supportRomanUrdu } = await req.json();
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY is not set');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Prepare context with business data and subscription features
-    let context = businessData ? `
-    Business Context:
-    - Total Sales: PKR ${businessData.totalSales || 0}
-    - Total Purchases: PKR ${businessData.totalPurchases || 0}
-    - Profit: PKR ${businessData.profit || 0}
-    - Available Inventory: ${businessData.availableInventory || 0} units
-    - Total Customers: ${businessData.totalCustomers || 0}
-    
-    Based on this mobile phone business data, please provide insights and recommendations.
-    ` : '';
+    // Build business context (safe defaults)
+    const context = businessData ? `Business Context\n- Total Sales: PKR ${businessData.totalSales || 0}\n- Total Purchases: PKR ${businessData.totalPurchases || 0}\n- Profit: PKR ${businessData.profit || 0}\n- Available Inventory: ${businessData.availableInventory || 0} units\n- Total Customers: ${businessData.totalCustomers || 0}\n` : '';
 
-    // Add Roman Urdu support for Premium users
-    if (subscriptionTier === 'premium' && supportRomanUrdu) {
-      context += `
-      
-      IMPORTANT: You can understand and respond in Roman Urdu (Urdu written in English alphabet). 
-      If the user asks in Roman Urdu, respond in Roman Urdu. If they ask in English, respond in English.
-      
-      Examples:
-      - "Mera business kaisa chal raha hai?" → Respond about business performance in Roman Urdu
-      - "Sales kaise badhain?" → Give sales tips in Roman Urdu
-      `;
-    }
+    // Friendly, bilingual assistant system prompt with auto language detection
+    // Note: We still support Roman Urdu nicely; premium gating remains handled on the client.
+    const systemPrompt = `
+You are a friendly AI business assistant for a mobile phone shop. Be concise, helpful and proactive.
+Language behavior:
+- Always reply in the same language as the user's last message.
+- If the user writes in English, answer in English.
+- If the user writes in Urdu or Roman Urdu, answer in that style (keep Roman Urdu simple and clear).
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `${context}\n\nUser Question: ${prompt}`
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
-          }
-        })
-      }
-    );
+Guidelines:
+- Use the provided business context for insights. If information is missing, say so and suggest practical next steps.
+- Keep tone warm and respectful, and greet back if the user says hello.
+- Do not invent numbers; clearly state when data is unavailable.
+`;
+
+    // Compose messages for the Lovable AI Gateway (OpenAI-compatible schema)
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `${context}\nUser Question: ${prompt}` },
+    ];
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash', // Default fast + free (until Oct 13, 2025)
+        messages,
+        stream: false,
+      }),
+    });
 
     if (!response.ok) {
-      const errorBody = await response.text();
-      console.error('Gemini API non-OK response:', response.status, errorBody);
+      const detail = await response.text();
+      console.error('AI gateway error:', response.status, detail);
+
+      // Surface rate limit and payment messages clearly to the client
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limits exceeded, please try again in a moment.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'Payment required for AI usage. Please add credits to your workspace.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       return new Response(
-        JSON.stringify({ error: 'Gemini API request failed', status: response.status, detail: errorBody }),
+        JSON.stringify({ error: 'AI gateway request failed', status: response.status, detail }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
+    const generatedText = data.choices?.[0]?.message?.content || 'No response generated';
 
     return new Response(JSON.stringify({ response: generatedText }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
