@@ -7,15 +7,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Edit, Trash2, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface Purchase {
   id: string;
   purchase_price: number;
   purchase_date: string;
   supplier_name: string;
+  seller_cnic?: string;
+  seller_phone?: string;
   notes?: string;
   created_at: string;
   mobile_id: string;
@@ -34,6 +38,7 @@ interface Mobile {
 export default function Purchases() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { features } = useSubscription();
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [mobiles, setMobiles] = useState<Mobile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +51,8 @@ export default function Purchases() {
     purchase_price: '',
     purchase_date: new Date().toISOString().split('T')[0],
     supplier_name: '',
+    seller_cnic: '',
+    seller_phone: '',
     notes: ''
   });
 
@@ -125,6 +132,8 @@ export default function Purchases() {
         purchase_price: parseFloat(formData.purchase_price),
         purchase_date: formData.purchase_date,
         supplier_name: formData.supplier_name,
+        seller_cnic: features.canTrackSellerInfo ? (formData.seller_cnic || null) : null,
+        seller_phone: features.canTrackSellerInfo ? (formData.seller_phone || null) : null,
         notes: formData.notes || null,
         user_id: user?.id
       };
@@ -186,6 +195,8 @@ export default function Purchases() {
       purchase_price: '',
       purchase_date: new Date().toISOString().split('T')[0],
       supplier_name: '',
+      seller_cnic: '',
+      seller_phone: '',
       notes: ''
     });
     setEditingPurchase(null);
@@ -200,6 +211,8 @@ export default function Purchases() {
       purchase_price: purchase.purchase_price.toString(),
       purchase_date: purchase.purchase_date,
       supplier_name: purchase.supplier_name,
+      seller_cnic: purchase.seller_cnic || '',
+      seller_phone: purchase.seller_phone || '',
       notes: purchase.notes || ''
     });
     setIsDialogOpen(true);
@@ -304,6 +317,32 @@ export default function Purchases() {
                   required
                 />
               </div>
+              {features.canTrackSellerInfo && (
+                <>
+                  <div>
+                    <Label htmlFor="seller_cnic">
+                      Seller CNIC <Badge variant="outline" className="ml-2">Standard+</Badge>
+                    </Label>
+                    <Input
+                      id="seller_cnic"
+                      placeholder="12345-1234567-1"
+                      value={formData.seller_cnic}
+                      onChange={(e) => setFormData({ ...formData, seller_cnic: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="seller_phone">
+                      Seller Phone <Badge variant="outline" className="ml-2">Standard+</Badge>
+                    </Label>
+                    <Input
+                      id="seller_phone"
+                      placeholder="03XX-XXXXXXX"
+                      value={formData.seller_phone}
+                      onChange={(e) => setFormData({ ...formData, seller_phone: e.target.value })}
+                    />
+                  </div>
+                </>
+              )}
               <div>
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea

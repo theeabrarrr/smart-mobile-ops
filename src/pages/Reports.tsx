@@ -3,7 +3,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BarChart3, TrendingUp, TrendingDown, Users, Smartphone, ShoppingCart, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { BarChart3, TrendingUp, TrendingDown, Users, Smartphone, ShoppingCart, FileText, Crown } from 'lucide-react';
+import { useSubscription } from '@/hooks/useSubscription';
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface ReportData {
   totalSales: number;
@@ -31,6 +34,8 @@ interface ReportData {
 
 export default function Reports() {
   const { user } = useAuth();
+  const { features } = useSubscription();
+  const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
   const [reportData, setReportData] = useState<ReportData>({
     totalSales: 0,
     totalPurchases: 0,
@@ -47,9 +52,14 @@ export default function Reports() {
 
   useEffect(() => {
     if (user) {
+      if (!features.canAccessReports) {
+        setShowUpgradeAlert(true);
+        setLoading(false);
+        return;
+      }
       fetchReportData();
     }
-  }, [user]);
+  }, [user, features]);
 
   const fetchReportData = async () => {
     try {
@@ -131,11 +141,39 @@ export default function Reports() {
 
   if (loading) return <div className="p-6">Loading reports...</div>;
 
+  if (!features.canAccessReports) {
+    return (
+      <AlertDialog open={showUpgradeAlert} onOpenChange={setShowUpgradeAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-yellow-500" />
+              Upgrade to Standard or Premium
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Reports and analytics are available on Standard and Premium plans. Upgrade now to access detailed business insights, profit tracking, and data export features!
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button variant="outline" onClick={() => window.location.href = '/dashboard'}>
+              Go Back
+            </Button>
+            <Button onClick={() => window.location.href = '/profile'}>
+              View Plans
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-2 mb-6">
         <BarChart3 className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold text-foreground">Reports & Analytics</h1>
+        <h1 className="text-3xl font-bold text-foreground">
+          Reports & Analytics <Badge variant="outline" className="ml-2">Standard+</Badge>
+        </h1>
       </div>
 
       {/* Key Metrics */}

@@ -15,13 +15,14 @@ interface SubscriptionManagerProps {
 const plans = [
   {
     id: 'basic',
-    name: 'Basic',
+    name: 'Free',
     price: 'Free',
     features: [
-      'Customer management',
-      'Mobile inventory tracking',
-      'Sales & purchase records',
-      'Basic reports'
+      'Up to 20 mobiles only',
+      'Basic customer management',
+      'Simple sales tracking',
+      'No profit tracking',
+      'No export or reports'
     ],
     icon: Star,
     color: 'bg-blue-500'
@@ -29,13 +30,14 @@ const plans = [
   {
     id: 'standard',
     name: 'Standard',
-    price: 'PKR 799',
+    price: 'PKR 799/month',
     features: [
-      'Everything in Basic',
-      'Invoice generation',
-      'Monthly reports',
-      'Export data',
-      'Priority support'
+      'Unlimited inventory',
+      'Profit tracking on dashboard',
+      'Per-sale profit calculation',
+      'Seller CNIC & Phone tracking',
+      'Standard reports',
+      'CSV data export'
     ],
     icon: Crown,
     color: 'bg-green-500'
@@ -43,13 +45,14 @@ const plans = [
   {
     id: 'premium',
     name: 'Premium',
-    price: 'PKR 1,499',
+    price: 'PKR 1,499/month',
     features: [
       'Everything in Standard',
-      'AI Assistant & Predictions',
+      'AI Business Assistant',
+      'Bulk stock purchase',
+      'Custom date-range reports',
       'Advanced analytics',
-      'Automated insights',
-      'White-label reports'
+      'Priority support'
     ],
     icon: Crown,
     color: 'bg-purple-500'

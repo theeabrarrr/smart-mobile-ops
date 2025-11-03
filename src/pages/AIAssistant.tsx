@@ -33,8 +33,8 @@ export default function AIAssistant() {
 
   useEffect(() => {
     if (user) {
-      fetchBusinessStats();
       fetchUserSubscription();
+      fetchBusinessStats();
     }
   }, [user]);
 
@@ -47,7 +47,20 @@ export default function AIAssistant() {
         .single();
       
       if (data) {
-        setUserSubscriptionTier(data.subscription_tier || 'basic');
+        const tier = data.subscription_tier || 'basic';
+        setUserSubscriptionTier(tier);
+        
+        // Redirect if not premium
+        if (tier !== 'premium') {
+          toast({
+            title: "Premium Feature",
+            description: "AI Assistant is only available on Premium plan. Please upgrade to access this feature.",
+            variant: "destructive"
+          });
+          setTimeout(() => {
+            window.location.href = '/profile';
+          }, 2000);
+        }
       }
     } catch (error) {
       console.error('Error fetching user subscription:', error);

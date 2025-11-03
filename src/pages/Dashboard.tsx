@@ -3,8 +3,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Smartphone, ShoppingCart, TrendingUp } from 'lucide-react';
+import { Users, Smartphone, ShoppingCart, TrendingUp, DollarSign } from 'lucide-react';
 import ExportData from '@/components/ExportData';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface Profile {
   id: string;
@@ -18,16 +19,19 @@ interface DashboardStats {
   totalMobiles: number;
   totalSales: number;
   totalRevenue: number;
+  totalProfit: number;
 }
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { features } = useSubscription();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     totalCustomers: 0,
     totalMobiles: 0,
     totalSales: 0,
-    totalRevenue: 0
+    totalRevenue: 0,
+    totalProfit: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -94,14 +98,23 @@ const Dashboard = () => {
         .select('sale_price')
         .eq('user_id', user.id);
 
+      // Fetch purchases for profit calculation
+      const { data: purchasesData } = await supabase
+        .from('purchases')
+        .select('purchase_price')
+        .eq('user_id', user.id);
+
       const totalSales = salesData?.length || 0;
       const totalRevenue = salesData?.reduce((sum, sale) => sum + Number(sale.sale_price), 0) || 0;
+      const totalPurchases = purchasesData?.reduce((sum, purchase) => sum + Number(purchase.purchase_price), 0) || 0;
+      const totalProfit = totalRevenue - totalPurchases;
 
       setStats({
         totalCustomers: customersCount || 0,
         totalMobiles: mobilesCount || 0,
         totalSales,
-        totalRevenue
+        totalRevenue,
+        totalProfit
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -200,6 +213,25 @@ const Dashboard = () => {
             </p>
           </CardContent>
         </Card>
+
+        {features.canAccessProfitTracking && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Profit <Badge variant="outline" className="ml-2">Standard+</Badge>
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                PKR {stats.totalProfit.toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {stats.totalProfit >= 0 ? 'Profit' : 'Loss'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Feature Access Based on Subscription */}
@@ -240,23 +272,30 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="text-sm">✓ Customer management</div>
-            <div className="text-sm">✓ Mobile inventory tracking</div>
-            <div className="text-sm">✓ Sales & purchase records</div>
-            {profile?.subscription_tier !== 'basic' ? (
+            <div className="text-sm">✓ Basic inventory (Free: 20 limit)</div>
+            <div className="text-sm">✓ Sales tracking</div>
+            {features.canAccessProfitTracking ? (
               <>
-                <div className="text-sm text-green-600">✓ Data export</div>
-                <div className="text-sm text-green-600">✓ Email support</div>
+                <div className="text-sm text-green-600">✓ Unlimited inventory</div>
+                <div className="text-sm text-green-600">✓ Profit tracking</div>
+                <div className="text-sm text-green-600">✓ Seller CNIC & Phone</div>
+                <div className="text-sm text-green-600">✓ Reports & CSV export</div>
               </>
             ) : (
               <>
-                <div className="text-sm text-muted-foreground">✗ Data export</div>
-                <div className="text-sm text-muted-foreground">✗ Email support</div>
+                <div className="text-sm text-muted-foreground">✗ Unlimited inventory</div>
+                <div className="text-sm text-muted-foreground">✗ Profit tracking</div>
+                <div className="text-sm text-muted-foreground">✗ Reports & CSV export</div>
               </>
             )}
-            {profile?.subscription_tier === 'premium' ? (
-              <div className="text-sm text-purple-600">✓ AI Assistant with Roman Urdu & Custom Reports</div>
+            {features.canAccessAI ? (
+              <>
+                <div className="text-sm text-purple-600">✓ AI Assistant</div>
+                <div className="text-sm text-purple-600">✓ Bulk Purchase</div>
+                <div className="text-sm text-purple-600">✓ Custom Reports</div>
+              </>
             ) : (
-              <div className="text-sm text-muted-foreground">✗ AI Assistant with Roman Urdu & Custom Reports</div>
+              <div className="text-sm text-muted-foreground">✗ Premium features (AI, Bulk, Custom Reports)</div>
             )}
           </CardContent>
         </Card>

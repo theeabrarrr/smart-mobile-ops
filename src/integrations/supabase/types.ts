@@ -62,6 +62,8 @@ export type Database = {
           notes: string | null
           purchase_date: string | null
           purchase_price: number | null
+          seller_cnic: string | null
+          seller_phone: string | null
           selling_price: number | null
           supplier_name: string | null
           updated_at: string
@@ -78,6 +80,8 @@ export type Database = {
           notes?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
+          seller_cnic?: string | null
+          seller_phone?: string | null
           selling_price?: number | null
           supplier_name?: string | null
           updated_at?: string
@@ -94,6 +98,8 @@ export type Database = {
           notes?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
+          seller_cnic?: string | null
+          seller_phone?: string | null
           selling_price?: number | null
           supplier_name?: string | null
           updated_at?: string
@@ -148,6 +154,8 @@ export type Database = {
           notes: string | null
           purchase_date: string
           purchase_price: number
+          seller_cnic: string | null
+          seller_phone: string | null
           supplier_name: string
           updated_at: string
           user_id: string
@@ -159,6 +167,8 @@ export type Database = {
           notes?: string | null
           purchase_date?: string
           purchase_price: number
+          seller_cnic?: string | null
+          seller_phone?: string | null
           supplier_name: string
           updated_at?: string
           user_id: string
@@ -170,6 +180,8 @@ export type Database = {
           notes?: string | null
           purchase_date?: string
           purchase_price?: number
+          seller_cnic?: string | null
+          seller_phone?: string | null
           supplier_name?: string
           updated_at?: string
           user_id?: string

@@ -23,8 +23,8 @@ export default function ExportData({ userSubscriptionTier }: ExportDataProps) {
   const exportData = async () => {
     if (!canExport) {
       toast({
-        title: "Upgrade Required",
-        description: "Export feature is available for Standard and Premium plans only.",
+        title: "Upgrade to Standard",
+        description: "Data export is available on Standard and Premium plans.",
         variant: "destructive"
       });
       return;
