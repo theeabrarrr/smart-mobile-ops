@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Users, Smartphone, ShoppingCart, TrendingUp, DollarSign } from 'lucide-react';
 import ExportData from '@/components/ExportData';
 import { useSubscription } from '@/hooks/useSubscription';
+import { sanitizeError } from '@/lib/errorHandling';
+import { useToast } from '@/hooks/use-toast';
 
 interface Profile {
   id: string;
@@ -25,6 +27,7 @@ interface DashboardStats {
 const Dashboard = () => {
   const { user } = useAuth();
   const { features } = useSubscription();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     totalCustomers: 0,
@@ -52,7 +55,14 @@ const Dashboard = () => {
       .maybeSingle();
 
     if (error) {
-      console.error('Error fetching profile:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Error fetching profile:', error);
+      }
+      toast({
+        title: "Error",
+        description: sanitizeError(error, 'Fetching profile'),
+        variant: "destructive"
+      });
     } else if (data) {
       setProfile(data);
     } else {
@@ -68,7 +78,14 @@ const Dashboard = () => {
         .single();
       
       if (insertError) {
-        console.error('Error creating profile:', insertError);
+        if (import.meta.env.DEV) {
+          console.error('[Dev] Error creating profile:', insertError);
+        }
+        toast({
+          title: "Error",
+          description: sanitizeError(insertError, 'Creating profile'),
+          variant: "destructive"
+        });
       } else {
         setProfile(newProfile);
       }
@@ -117,7 +134,14 @@ const Dashboard = () => {
         totalProfit
       });
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Error fetching stats:', error);
+      }
+      toast({
+        title: "Error",
+        description: sanitizeError(error, 'Fetching dashboard stats'),
+        variant: "destructive"
+      });
     }
     
     setLoading(false);

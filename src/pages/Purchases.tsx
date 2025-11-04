@@ -13,6 +13,7 @@ import { Plus, Edit, Trash2, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
 import { purchaseSchema } from '@/lib/validationSchemas';
+import { sanitizeError } from '@/lib/errorHandling';
 
 interface Purchase {
   id: string;
@@ -97,7 +98,9 @@ export default function Purchases() {
       if (error) throw error;
       setMobiles(data || []);
     } catch (error) {
-      console.error('Error fetching mobiles:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Error fetching mobiles:', error);
+      }
     }
   };
 

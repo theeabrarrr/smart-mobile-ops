@@ -255,7 +255,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_subscription_tier: {
+        Args: { _required_tier: string; _user_id: string }
+        Returns: boolean
+      }
+      get_user_mobile_count: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
       mobile_condition: "new" | "excellent" | "good" | "fair" | "poor"

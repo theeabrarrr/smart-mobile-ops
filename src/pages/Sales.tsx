@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saleSchema, customerSchema } from '@/lib/validationSchemas';
+import { sanitizeError } from '@/lib/errorHandling';
 
 interface Sale {
   id: string;
@@ -108,7 +109,9 @@ export default function Sales() {
       if (error) throw error;
       setCustomers(data || []);
     } catch (error) {
-      console.error('Error fetching customers:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Error fetching customers:', error);
+      }
     }
   };
 
@@ -123,7 +126,9 @@ export default function Sales() {
       if (error) throw error;
       setAvailableMobiles(data || []);
     } catch (error) {
-      console.error('Error fetching mobiles:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Error fetching mobiles:', error);
+      }
     }
   };
 
@@ -159,7 +164,9 @@ export default function Sales() {
       
       return data.id;
     } catch (error) {
-      console.error('Error creating customer:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Error creating customer:', error);
+      }
       throw error;
     }
   };

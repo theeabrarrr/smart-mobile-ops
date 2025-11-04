@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, FileText, TrendingUp, Users, Smartphone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { sanitizeError } from '@/lib/errorHandling';
 
 interface CustomReportsProps {
   userSubscriptionTier: string;
@@ -76,10 +77,12 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
         description: "Custom report has been generated successfully."
       });
     } catch (error) {
-      console.error('Report generation error:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Report generation error:', error);
+      }
       toast({
         title: "Report Generation Failed",
-        description: "Failed to generate report. Please try again.",
+        description: sanitizeError(error, 'Report generation'),
         variant: "destructive"
       });
     } finally {

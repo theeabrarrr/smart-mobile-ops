@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Download, FileText, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeError } from '@/lib/errorHandling';
 
 interface ExportDataProps {
   userSubscriptionTier: string;
@@ -127,10 +128,12 @@ export default function ExportData({ userSubscriptionTier }: ExportDataProps) {
         });
       }
     } catch (error) {
-      console.error('Export error:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Export error:', error);
+      }
       toast({
         title: "Export Failed",
-        description: "Failed to export data. Please try again.",
+        description: sanitizeError(error, 'Data export'),
         variant: "destructive"
       });
     } finally {

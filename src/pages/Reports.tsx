@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { BarChart3, TrendingUp, TrendingDown, Users, Smartphone, ShoppingCart, FileText, Crown } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { sanitizeError } from '@/lib/errorHandling';
+import { useToast } from '@/hooks/use-toast';
 
 interface ReportData {
   totalSales: number;
@@ -35,6 +37,7 @@ interface ReportData {
 export default function Reports() {
   const { user } = useAuth();
   const { features } = useSubscription();
+  const { toast } = useToast();
   const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
   const [reportData, setReportData] = useState<ReportData>({
     totalSales: 0,
@@ -133,7 +136,14 @@ export default function Reports() {
         topMobiles
       });
     } catch (error) {
-      console.error('Error fetching report data:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Error fetching report data:', error);
+      }
+      toast({
+        title: "Error",
+        description: sanitizeError(error, 'Fetching report data'),
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }

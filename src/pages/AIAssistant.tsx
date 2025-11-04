@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Bot, Send, Sparkles, TrendingUp, Smartphone, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeError } from '@/lib/errorHandling';
 
 interface BusinessStats {
   totalSales: number;
@@ -63,7 +64,9 @@ export default function AIAssistant() {
         }
       }
     } catch (error) {
-      console.error('Error fetching user subscription:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Error fetching user subscription:', error);
+      }
     }
   };
 
@@ -106,7 +109,9 @@ export default function AIAssistant() {
         totalCustomers: customersCount || 0
       });
     } catch (error) {
-      console.error('Error fetching business stats:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Error fetching business stats:', error);
+      }
     }
   };
 
@@ -148,15 +153,19 @@ export default function AIAssistant() {
         content: data.response || 'Sorry, I could not generate a response. Please try again.' 
       }]);
     } catch (error) {
-      console.error('Error calling AI assistant:', error);
+      if (import.meta.env.DEV) {
+        console.error('[Dev] Error calling AI assistant:', error);
+      }
+      
+      const errorMsg = sanitizeError(error, 'AI assistant call');
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'Sorry, I encountered an error while processing your request. Please make sure the Gemini API is properly configured and try again.' 
+        content: 'Sorry, I encountered an error. Please try again.' 
       }]);
       
       toast({
         title: "AI Assistant Error",
-        description: "Failed to get AI response. Please check your API configuration.",
+        description: errorMsg,
         variant: "destructive"
       });
     } finally {
