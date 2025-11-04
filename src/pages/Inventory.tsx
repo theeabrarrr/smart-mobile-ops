@@ -13,6 +13,7 @@ import { Plus, Edit, Trash2, Smartphone, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { mobileSchema } from '@/lib/validationSchemas';
 
 interface Mobile {
   id: string;
@@ -99,19 +100,32 @@ export default function Inventory() {
       return;
     }
 
+    // Validate input
+    const validation = mobileSchema.safeParse(formData);
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const mobileData = {
-        brand: formData.brand,
-        model: formData.model,
-        imei: formData.imei || null,
-        condition: formData.condition as 'excellent' | 'good' | 'fair' | 'poor',
-        purchase_price: formData.purchase_price ? parseFloat(formData.purchase_price) : null,
-        selling_price: formData.selling_price ? parseFloat(formData.selling_price) : null,
-        purchase_date: formData.purchase_date || null,
-        supplier_name: formData.supplier_name || null,
-        seller_cnic: features.canTrackSellerInfo ? (formData.seller_cnic || null) : null,
-        seller_phone: features.canTrackSellerInfo ? (formData.seller_phone || null) : null,
-        notes: formData.notes || null,
+        brand: validation.data.brand,
+        model: validation.data.model,
+        imei: validation.data.imei || null,
+        condition: validation.data.condition as 'excellent' | 'good' | 'fair' | 'poor',
+        purchase_price: validation.data.purchase_price ? parseFloat(validation.data.purchase_price) : null,
+        selling_price: validation.data.selling_price ? parseFloat(validation.data.selling_price) : null,
+        purchase_date: validation.data.purchase_date || null,
+        supplier_name: validation.data.supplier_name || null,
+        seller_cnic: features.canTrackSellerInfo ? (validation.data.seller_cnic || null) : null,
+        seller_phone: features.canTrackSellerInfo ? (validation.data.seller_phone || null) : null,
+        notes: validation.data.notes || null,
         user_id: user?.id
       };
 

@@ -13,15 +13,50 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, businessData, subscriptionTier, supportRomanUrdu } = await req.json();
+    const body = await req.json();
+    const { prompt, businessData, subscriptionTier, supportRomanUrdu } = body;
+    
+    // Validate and sanitize input
+    if (!prompt || typeof prompt !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Invalid prompt provided' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Limit prompt length to prevent abuse
+    if (prompt.length > 5000) {
+      return new Response(
+        JSON.stringify({ error: 'Prompt is too long. Maximum 5000 characters allowed.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Sanitize prompt - remove potential injection attempts
+    const sanitizedPrompt = prompt.trim();
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Build business context (safe defaults)
-    const context = businessData ? `Business Context\n- Total Sales: PKR ${businessData.totalSales || 0}\n- Total Purchases: PKR ${businessData.totalPurchases || 0}\n- Profit: PKR ${businessData.profit || 0}\n- Available Inventory: ${businessData.availableInventory || 0} units\n- Total Customers: ${businessData.totalCustomers || 0}\n` : '';
+    // Build business context with validation (safe defaults)
+    let context = '';
+    if (businessData && typeof businessData === 'object') {
+      // Validate numeric fields
+      const validateNumber = (val: any) => {
+        const num = Number(val);
+        return !isNaN(num) && num >= 0 && num < Number.MAX_SAFE_INTEGER ? num : 0;
+      };
+      
+      context = `Business Context
+- Total Sales: PKR ${validateNumber(businessData.totalSales)}
+- Total Purchases: PKR ${validateNumber(businessData.totalPurchases)}
+- Profit: PKR ${validateNumber(businessData.profit)}
+- Available Inventory: ${validateNumber(businessData.availableInventory)} units
+- Total Customers: ${validateNumber(businessData.totalCustomers)}
+`;
+    }
 
     // Friendly, bilingual assistant system prompt with auto language detection
     // Note: We still support Roman Urdu nicely; premium gating remains handled on the client.
@@ -41,7 +76,7 @@ Guidelines:
     // Compose messages for the Lovable AI Gateway (OpenAI-compatible schema)
     const messages = [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: `${context}\nUser Question: ${prompt}` },
+      { role: 'user', content: `${context}\nUser Question: ${sanitizedPrompt}` },
     ];
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

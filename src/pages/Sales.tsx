@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { saleSchema, customerSchema } from '@/lib/validationSchemas';
 
 interface Sale {
   id: string;
@@ -127,11 +128,25 @@ export default function Sales() {
   };
 
   const createNewCustomer = async (customerName: string) => {
+    // Validate customer name
+    const validation = customerSchema.safeParse({ 
+      name: customerName.trim(),
+      email: '',
+      phone: '',
+      address: '',
+      notes: ''
+    });
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new Error(firstError.message);
+    }
+    
     try {
       const { data, error } = await supabase
         .from('customers')
         .insert([{
-          name: customerName.trim(),
+          name: validation.data.name,
           user_id: user?.id
         }])
         .select()
@@ -152,12 +167,34 @@ export default function Sales() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate input
+    const validation = saleSchema.safeParse(formData);
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       let customerId = formData.customer_id;
       
       // If no customer_id but we have a customer_name, create new customer
       if (!customerId && formData.customer_name.trim()) {
-        customerId = await createNewCustomer(formData.customer_name);
+        try {
+          customerId = await createNewCustomer(formData.customer_name);
+        } catch (validationError) {
+          toast({
+            title: "Validation Error",
+            description: validationError instanceof Error ? validationError.message : "Invalid customer name",
+            variant: "destructive"
+          });
+          return;
+        }
       }
       
       if (!customerId) {
@@ -170,12 +207,12 @@ export default function Sales() {
       }
       
       const saleData = {
-        mobile_id: formData.mobile_id,
+        mobile_id: validation.data.mobile_id,
         customer_id: customerId,
-        sale_price: parseFloat(formData.sale_price),
-        sale_date: formData.sale_date,
-        payment_status: formData.payment_status as 'pending' | 'paid' | 'partial' | 'cancelled',
-        notes: formData.notes || null,
+        sale_price: parseFloat(validation.data.sale_price),
+        sale_date: validation.data.sale_date,
+        payment_status: validation.data.payment_status as 'pending' | 'paid' | 'partial' | 'cancelled',
+        notes: validation.data.notes || null,
         user_id: user?.id
       };
 

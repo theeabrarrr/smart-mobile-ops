@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Edit, Trash2, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
+import { purchaseSchema } from '@/lib/validationSchemas';
 
 interface Purchase {
   id: string;
@@ -103,6 +104,19 @@ export default function Purchases() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate input
+    const validation = purchaseSchema.safeParse(formData);
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       // First create/add mobile to inventory if it doesn't exist
       let mobileId = formData.mobile_id;
@@ -111,14 +125,14 @@ export default function Purchases() {
         const { data: newMobile, error: mobileError } = await supabase
           .from('mobiles')
           .insert([{
-            brand: formData.brand,
-            model: formData.model,
+            brand: validation.data.brand,
+            model: validation.data.model,
             user_id: user?.id,
             condition: 'good',
-            purchase_price: parseFloat(formData.purchase_price),
-            purchase_date: formData.purchase_date,
-            supplier_name: formData.supplier_name,
-            notes: formData.notes || null
+            purchase_price: parseFloat(validation.data.purchase_price),
+            purchase_date: validation.data.purchase_date,
+            supplier_name: validation.data.supplier_name,
+            notes: validation.data.notes || null
           }])
           .select()
           .single();
@@ -129,12 +143,12 @@ export default function Purchases() {
 
       const purchaseData = {
         mobile_id: mobileId,
-        purchase_price: parseFloat(formData.purchase_price),
-        purchase_date: formData.purchase_date,
-        supplier_name: formData.supplier_name,
-        seller_cnic: features.canTrackSellerInfo ? (formData.seller_cnic || null) : null,
-        seller_phone: features.canTrackSellerInfo ? (formData.seller_phone || null) : null,
-        notes: formData.notes || null,
+        purchase_price: parseFloat(validation.data.purchase_price),
+        purchase_date: validation.data.purchase_date,
+        supplier_name: validation.data.supplier_name,
+        seller_cnic: features.canTrackSellerInfo ? (validation.data.seller_cnic || null) : null,
+        seller_phone: features.canTrackSellerInfo ? (validation.data.seller_phone || null) : null,
+        notes: validation.data.notes || null,
         user_id: user?.id
       };
 

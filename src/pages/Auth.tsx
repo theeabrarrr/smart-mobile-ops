@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Smartphone, Shield, BarChart3 } from 'lucide-react';
+import { authSignUpSchema, authSignInSchema } from '@/lib/validationSchemas';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -19,10 +20,19 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim()) {
+    
+    // Validate input
+    const validation = authSignUpSchema.safeParse({
+      fullName: fullName,
+      email: email,
+      password: password
+    });
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
       toast({
-        title: "Error",
-        description: "Please enter your full name",
+        title: "Validation Error",
+        description: firstError.message,
         variant: "destructive"
       });
       return;
@@ -48,6 +58,23 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input
+    const validation = authSignInSchema.safeParse({
+      email: email,
+      password: password
+    });
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setLoading(true);
     const { error } = await signIn(email, password);
     setLoading(false);

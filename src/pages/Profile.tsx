@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { User, Crown, Check, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import CustomReports from '@/components/CustomReports';
+import { profileSchema } from '@/lib/validationSchemas';
 
 interface Profile {
   id: string;
@@ -115,10 +116,23 @@ export default function Profile() {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate input
+    const validation = profileSchema.safeParse(formData);
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('profiles')
-        .update(formData)
+        .update(validation.data)
         .eq('user_id', user?.id);
       
       if (error) throw error;

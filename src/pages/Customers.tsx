@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { customerSchema } from '@/lib/validationSchemas';
 
 interface Customer {
   id: string;
@@ -64,11 +65,33 @@ export default function Customers() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate input
+    const validation = customerSchema.safeParse(formData);
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
+      // Prepare data with required fields
+      const customerData = {
+        name: validation.data.name,
+        email: validation.data.email || null,
+        phone: validation.data.phone || null,
+        address: validation.data.address || null,
+        notes: validation.data.notes || null
+      };
+      
       if (editingCustomer) {
         const { error } = await supabase
           .from('customers')
-          .update(formData)
+          .update(customerData)
           .eq('id', editingCustomer.id);
         
         if (error) throw error;
@@ -76,7 +99,7 @@ export default function Customers() {
       } else {
         const { error } = await supabase
           .from('customers')
-          .insert([{ ...formData, user_id: user?.id }]);
+          .insert([{ ...customerData, user_id: user?.id }]);
         
         if (error) throw error;
         toast({ title: "Success", description: "Customer added successfully" });
