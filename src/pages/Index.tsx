@@ -8,19 +8,13 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!loading && user) {
+  const handleGetStarted = () => {
+    if (user) {
       navigate('/dashboard');
+    } else {
+      navigate('/auth');
     }
-  }, [user, loading, navigate]);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,7 +25,7 @@ const Index = () => {
             <Smartphone className="h-8 w-8 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">MobileSales Pro</h1>
           </div>
-          <Button onClick={() => navigate('/auth')} className="flex items-center gap-2">
+          <Button onClick={handleGetStarted} className="flex items-center gap-2">
             Get Started
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -50,7 +44,7 @@ const Index = () => {
           </p>
           <Button 
             size="lg" 
-            onClick={() => navigate('/auth')}
+            onClick={handleGetStarted}
             className="text-lg px-8 py-3"
           >
             Start Free Trial
