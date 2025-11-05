@@ -1,46 +1,40 @@
 import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Download, FileText, Mail } from 'lucide-react';
+import { Download, Mail } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 import { sanitizeError } from '@/lib/errorHandling';
+import { useSubscription } from '@/hooks/useSubscription';
+import { canAccessFeature, getUpgradeMessage } from '@/lib/subscriptionTiers';
+import { UpgradeDialog } from './UpgradeDialog';
 
-interface ExportDataProps {
-  userSubscriptionTier: string;
-}
-
-export default function ExportData({ userSubscriptionTier }: ExportDataProps) {
+const ExportData = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { tier } = useSubscription();
   const [exportType, setExportType] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const canExport = userSubscriptionTier === 'standard' || userSubscriptionTier === 'premium';
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const exportData = async () => {
-    if (!canExport) {
-      toast({
-        title: "Upgrade to Standard",
-        description: "Data export is available on Standard and Premium plans.",
-        variant: "destructive"
-      });
+    // Check subscription tier
+    if (!canAccessFeature(tier, 'export_data')) {
+      setShowUpgradeDialog(true);
       return;
     }
 
     if (!exportType) {
       toast({
-        title: "Select Export Type",
-        description: "Please select what data you want to export.",
+        title: "Error",
+        description: "Please select a data type to export",
         variant: "destructive"
       });
       return;
     }
 
-    setLoading(true);
     try {
       let data;
       let filename;
@@ -136,8 +130,6 @@ export default function ExportData({ userSubscriptionTier }: ExportDataProps) {
         description: sanitizeError(error, 'Data export'),
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -175,59 +167,57 @@ export default function ExportData({ userSubscriptionTier }: ExportDataProps) {
   };
 
   const sendEmailSupport = () => {
-    if (!canExport) {
-      toast({
-        title: "Upgrade Required",
-        description: "Email support is available for Standard and Premium plans only.",
-        variant: "destructive"
-      });
+    // Check subscription tier
+    if (!canAccessFeature(tier, 'email_support')) {
+      setShowUpgradeDialog(true);
       return;
     }
 
-    const subject = 'Support Request - Mobile Management System';
+    const subject = 'Support Request - MobileSales Pro';
     const body = `Hello Support Team,
 
-I need assistance with my mobile management system account.
+I need assistance with my MobileSales Pro account.
 
 User ID: ${user?.id}
 Email: ${user?.email}
-Subscription: ${userSubscriptionTier.toUpperCase()}
+Subscription: ${tier.toUpperCase()}
 
 Please describe your issue:
 
 
 Best regards`;
     
-    const mailtoLink = `mailto:support@mobilemgmt.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoLink);
-    
+    const mailtoLink = `mailto:support@mobilesalespro.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+
     toast({
       title: "Email Client Opened",
-      description: "Your email client should open with a pre-filled support request."
+      description: "Your email client has been opened with pre-filled support request. Please send the email to complete your support request.",
     });
   };
 
+  const hasExportAccess = canAccessFeature(tier, 'export_data');
+  const hasEmailAccess = canAccessFeature(tier, 'email_support');
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Download className="h-5 w-5" />
-          Data Export & Support
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {!canExport && (
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800">
-              🔒 Export functionality and email support are available for Standard and Premium plans.
-            </p>
-          </div>
-        )}
-        
-        <div className="space-y-3">
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Export & Support</CardTitle>
+          <CardDescription>
+            Export your data or contact support
+            {hasExportAccess && (
+              <Badge variant="outline" className="ml-2">Standard+</Badge>
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Export Data</label>
-            <Select value={exportType} onValueChange={setExportType} disabled={!canExport}>
+            <Select 
+              value={exportType} 
+              onValueChange={setExportType}
+              disabled={!hasExportAccess}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select data to export" />
               </SelectTrigger>
@@ -239,39 +229,48 @@ Best regards`;
             </Select>
           </div>
           
-          <div className="flex gap-2">
-            <Button 
-              onClick={exportData} 
-              disabled={loading || !canExport}
-              className="flex-1"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              {loading ? 'Exporting...' : 'Export to CSV'}
-            </Button>
-            
-            <Button 
-              onClick={sendEmailSupport}
-              variant="outline"
-              disabled={!canExport}
-              className="flex-1"
-            >
-              <Mail className="h-4 w-4 mr-2" />
-              Email Support
-            </Button>
-          </div>
-        </div>
-        
-        <div className="text-xs text-muted-foreground">
-          <Badge variant="secondary" className="mr-2">
-            {userSubscriptionTier.toUpperCase()}
-          </Badge>
-          {canExport ? (
-            "Export your data in CSV format for external analysis and backup."
-          ) : (
-            "Upgrade to Standard or Premium to unlock export and email support features."
+          <Button 
+            onClick={exportData} 
+            className="w-full"
+            disabled={!hasExportAccess}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export to CSV
+          </Button>
+          
+          <Button 
+            onClick={sendEmailSupport} 
+            variant="outline" 
+            className="w-full"
+            disabled={!hasEmailAccess}
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Email Support
+          </Button>
+
+          {!hasExportAccess && (
+            <div className="text-sm text-muted-foreground p-3 bg-muted rounded-md">
+              <p className="font-semibold mb-1">Upgrade to unlock:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>CSV export for sales, customers, and inventory</li>
+                <li>Direct email support</li>
+                <li>Full business reports and analytics</li>
+              </ul>
+              <p className="mt-2 text-xs">
+                Currently on Free plan. <a href="/profile" className="text-primary hover:underline">View upgrade options →</a>
+              </p>
+            </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        message={getUpgradeMessage(tier, 'export_data')}
+      />
+    </>
   );
-}
+};
+
+export default ExportData;

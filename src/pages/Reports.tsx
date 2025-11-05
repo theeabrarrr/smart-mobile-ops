@@ -9,6 +9,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { sanitizeError } from '@/lib/errorHandling';
 import { useToast } from '@/hooks/use-toast';
+import { canAccessFeature } from '@/lib/subscriptionTiers';
 
 interface ReportData {
   totalSales: number;
@@ -36,7 +37,7 @@ interface ReportData {
 
 export default function Reports() {
   const { user } = useAuth();
-  const { features } = useSubscription();
+  const { tier, features } = useSubscription();
   const { toast } = useToast();
   const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
   const [reportData, setReportData] = useState<ReportData>({
@@ -54,15 +55,18 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      if (!features.canAccessReports) {
-        setShowUpgradeAlert(true);
-        setLoading(false);
-        return;
-      }
-      fetchReportData();
+    if (!user) {
+      setLoading(false);
+      return;
     }
-  }, [user, features.canAccessReports]);
+
+    if (!canAccessFeature(tier, 'reports')) {
+      setShowUpgradeAlert(true);
+      setLoading(false);
+      return;
+    }
+    fetchReportData();
+  }, [user, tier]);
 
   const fetchReportData = async () => {
     try {

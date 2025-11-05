@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { SubscriptionTier } from '@/lib/subscriptionTiers';
 
-export type SubscriptionTier = 'basic' | 'standard' | 'premium';
+// Map database tiers to app tiers
+const mapDatabaseTier = (tier: string): SubscriptionTier => {
+  if (tier === 'basic') return 'free';
+  return tier as SubscriptionTier;
+};
 
 interface SubscriptionFeatures {
   canAddMoreMobiles: (currentCount: number) => boolean;
@@ -18,7 +23,7 @@ interface SubscriptionFeatures {
 
 export const useSubscription = () => {
   const { user } = useAuth();
-  const [tier, setTier] = useState<SubscriptionTier>('basic');
+  const [tier, setTier] = useState<SubscriptionTier>('free');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,7 +40,7 @@ export const useSubscription = () => {
         .single();
 
       if (data) {
-        setTier(data.subscription_tier as SubscriptionTier);
+        setTier(mapDatabaseTier(data.subscription_tier));
       }
       setLoading(false);
     };
@@ -45,7 +50,7 @@ export const useSubscription = () => {
 
   const features: SubscriptionFeatures = {
     canAddMoreMobiles: (currentCount: number) => {
-      if (tier === 'basic') return currentCount < 20;
+      if (tier === 'free') return currentCount < 20;
       return true; // standard and premium have unlimited
     },
     canAccessProfitTracking: tier === 'standard' || tier === 'premium',
@@ -55,7 +60,7 @@ export const useSubscription = () => {
     canAccessBulkPurchase: tier === 'premium',
     canAccessCustomReports: tier === 'premium',
     canTrackSellerInfo: tier === 'standard' || tier === 'premium',
-    maxMobiles: tier === 'basic' ? 20 : null,
+    maxMobiles: tier === 'free' ? 20 : null,
   };
 
   return {

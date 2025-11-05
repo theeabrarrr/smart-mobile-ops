@@ -324,7 +324,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <ExportData userSubscriptionTier={profile?.subscription_tier || 'basic'} />
+        <ExportData />
       </div>
     </div>
   );

@@ -8,6 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Bot, Send, Sparkles, TrendingUp, Smartphone, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { sanitizeError } from '@/lib/errorHandling';
+import { useSubscription } from '@/hooks/useSubscription';
+import { canAccessFeature, getUpgradeMessage } from '@/lib/subscriptionTiers';
+import { UpgradeDialog } from '@/components/UpgradeDialog';
 
 interface BusinessStats {
   totalSales: number;
@@ -20,10 +23,11 @@ interface BusinessStats {
 export default function AIAssistant() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { tier } = useSubscription();
   const [messages, setMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [userSubscriptionTier, setUserSubscriptionTier] = useState('basic');
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [businessStats, setBusinessStats] = useState<BusinessStats>({
     totalSales: 0,
     totalPurchases: 0,
@@ -34,41 +38,12 @@ export default function AIAssistant() {
 
   useEffect(() => {
     if (user) {
-      fetchUserSubscription();
+      if (!canAccessFeature(tier, 'ai_assistant')) {
+        setShowUpgradeDialog(true);
+      }
       fetchBusinessStats();
     }
-  }, [user]);
-
-  const fetchUserSubscription = async () => {
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('subscription_tier')
-        .eq('user_id', user?.id)
-        .single();
-      
-      if (data) {
-        const tier = data.subscription_tier || 'basic';
-        setUserSubscriptionTier(tier);
-        
-        // Redirect if not premium
-        if (tier !== 'premium') {
-          toast({
-            title: "Premium Feature",
-            description: "AI Assistant is only available on Premium plan. Please upgrade to access this feature.",
-            variant: "destructive"
-          });
-          setTimeout(() => {
-            window.location.href = '/profile';
-          }, 2000);
-        }
-      }
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('[Dev] Error fetching user subscription:', error);
-      }
-    }
-  };
+  }, [user, tier]);
 
   const fetchBusinessStats = async () => {
     try {
@@ -120,12 +95,8 @@ export default function AIAssistant() {
     if (!input.trim()) return;
 
     // Check subscription for premium features
-    if (userSubscriptionTier !== 'premium') {
-      toast({
-        title: "Premium Feature",
-        description: "AI Assistant is available for Premium plan users only. Please upgrade your subscription.",
-        variant: "destructive"
-      });
+    if (!canAccessFeature(tier, 'ai_assistant')) {
+      setShowUpgradeDialog(true);
       return;
     }
 
@@ -141,7 +112,7 @@ export default function AIAssistant() {
         body: { 
           prompt: userMessage,
           businessData: businessStats,
-          subscriptionTier: userSubscriptionTier,
+          subscriptionTier: tier,
           supportRomanUrdu: true
         }
       });
@@ -173,23 +144,25 @@ export default function AIAssistant() {
     }
   };
 
+  const hasAccess = canAccessFeature(tier, 'ai_assistant');
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-          <Bot className="h-8 w-8" />
-          AI Business Assistant
-          {userSubscriptionTier === 'premium' && (
-            <Badge variant="secondary" className="ml-2">Roman Urdu Support</Badge>
-          )}
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          {userSubscriptionTier === 'premium' 
-            ? "Get AI-powered insights in English and Roman Urdu for your mobile business"
-            : "AI Assistant is available for Premium plan users only"
-          }
-        </p>
-      </div>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+            <Bot className="h-8 w-8" />
+            AI Business Assistant
+            {hasAccess && (
+              <Badge variant="secondary" className="ml-2">Roman Urdu Support</Badge>
+            )}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {hasAccess 
+              ? "Get AI-powered insights in English and Roman Urdu for your mobile business"
+              : "AI Assistant is available for Premium plan users only"
+            }
+          </p>
+        </div>
 
       {/* Business Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
@@ -261,28 +234,28 @@ export default function AIAssistant() {
           </CardHeader>
           <CardContent className="space-y-2">
             <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3" 
-                    disabled={userSubscriptionTier !== 'premium'}
-                    onClick={() => setInput('What are my top selling mobile models and which ones should I focus on?')}>
+                    disabled={!hasAccess}
+                    onClick={() => hasAccess ? setInput('What are my top selling mobile models and which ones should I focus on?') : setShowUpgradeDialog(true)}>
               Top selling models
             </Button>
             <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
-                    disabled={userSubscriptionTier !== 'premium'}
-                    onClick={() => setInput('How can I improve my profit margins? What pricing strategies should I use?')}>
+                    disabled={!hasAccess}
+                    onClick={() => hasAccess ? setInput('How can I improve my profit margins? What pricing strategies should I use?') : setShowUpgradeDialog(true)}>
               Improve profit margins
             </Button>
             <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
-                    disabled={userSubscriptionTier !== 'premium'}
-                    onClick={() => setInput('What inventory should I stock next month based on my sales data?')}>
+                    disabled={!hasAccess}
+                    onClick={() => hasAccess ? setInput('What inventory should I stock next month based on my sales data?') : setShowUpgradeDialog(true)}>
               Inventory predictions
             </Button>
             <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
-                    disabled={userSubscriptionTier !== 'premium'}
-                    onClick={() => setInput('Analyze my sales trends and business performance. Give me insights.')}>
+                    disabled={!hasAccess}
+                    onClick={() => hasAccess ? setInput('Analyze my sales trends and business performance. Give me insights.') : setShowUpgradeDialog(true)}>
               Business analysis
             </Button>
             <Button variant="outline" size="sm" className="w-full text-left justify-start h-auto p-3"
-                    disabled={userSubscriptionTier !== 'premium'}
-                    onClick={() => setInput('Mujhe apne business ke liye Roman Urdu mein tips chahiye')}>
+                    disabled={!hasAccess}
+                    onClick={() => hasAccess ? setInput('Mujhe apne business ke liye Roman Urdu mein tips chahiye') : setShowUpgradeDialog(true)}>
               Roman Urdu Business Tips
             </Button>
           </CardContent>
@@ -336,20 +309,27 @@ export default function AIAssistant() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={userSubscriptionTier === 'premium' 
+                placeholder={hasAccess 
                   ? "Ask in English or Roman Urdu about your business..." 
                   : "Upgrade to Premium to use AI Assistant..."
                 }
-                disabled={loading || userSubscriptionTier !== 'premium'}
+                disabled={loading || !hasAccess}
                 className="flex-1"
               />
-              <Button type="submit" disabled={loading || !input.trim() || userSubscriptionTier !== 'premium'}>
+              <Button type="submit" disabled={loading || !input.trim() || !hasAccess}>
                 <Send className="h-4 w-4" />
               </Button>
             </form>
           </CardContent>
         </Card>
       </div>
+
+      {/* Upgrade Dialog */}
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        message={getUpgradeMessage(tier, 'ai_assistant')}
+      />
 
       {/* Features */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -372,6 +352,12 @@ export default function AIAssistant() {
           </CardContent>
         </Card>
       </div>
+
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        message={getUpgradeMessage(tier, 'ai_assistant')}
+      />
     </div>
   );
 }
