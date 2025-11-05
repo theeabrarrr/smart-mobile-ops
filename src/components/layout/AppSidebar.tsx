@@ -25,7 +25,8 @@ import {
   User,
   LogOut,
   Crown,
-  Shield
+  Shield,
+  Receipt
 } from 'lucide-react';
 import { useAdminRole } from '@/hooks/useAdminRole';
 
@@ -102,6 +103,12 @@ export const AppSidebar = () => {
       icon: Bot,
       path: '/ai-assistant',
       tier: 'premium'
+    },
+    {
+      title: 'My Invoices',
+      icon: Receipt,
+      path: '/invoices',
+      tier: 'basic'
     }
   ];
 
@@ -120,6 +127,11 @@ export const AppSidebar = () => {
       title: 'Subscriptions',
       icon: Crown,
       path: '/admin/subscriptions'
+    },
+    {
+      title: 'Invoices',
+      icon: Receipt,
+      path: '/admin/invoices'
     },
     {
       title: 'System Logs',

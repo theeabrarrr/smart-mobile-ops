@@ -21,7 +21,10 @@ import { AdminRoute } from "./components/AdminRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersManagement from "./pages/admin/UsersManagement";
 import SubscriptionManager from "./pages/admin/SubscriptionManager";
+import InvoiceManagement from "./pages/admin/InvoiceManagement";
 import SystemLogs from "./pages/admin/SystemLogs";
+import MyInvoices from "./pages/MyInvoices";
+import InvoiceDetail from "./pages/InvoiceDetail";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +79,16 @@ const App = () => (
                 <Profile />
               </DashboardLayout>
             } />
+            <Route path="/invoices" element={
+              <DashboardLayout>
+                <MyInvoices />
+              </DashboardLayout>
+            } />
+            <Route path="/invoice/:id" element={
+              <DashboardLayout>
+                <InvoiceDetail />
+              </DashboardLayout>
+            } />
             <Route path="/admin" element={
               <AdminRoute>
                 <DashboardLayout>
@@ -94,6 +107,13 @@ const App = () => (
               <AdminRoute>
                 <DashboardLayout>
                   <SubscriptionManager />
+                </DashboardLayout>
+              </AdminRoute>
+            } />
+            <Route path="/admin/invoices" element={
+              <AdminRoute>
+                <DashboardLayout>
+                  <InvoiceManagement />
                 </DashboardLayout>
               </AdminRoute>
             } />

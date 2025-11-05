@@ -8,6 +8,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { useLocation } from 'react-router-dom';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { ExpiryWarningBanner } from '@/components/ExpiryWarningBanner';
+import { PendingPaymentBanner } from '@/components/PendingPaymentBanner';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -72,6 +73,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4">
+            <PendingPaymentBanner />
             <ExpiryWarningBanner />
             {children}
           </main>

@@ -50,6 +50,57 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          id: string
+          invoice_date: string
+          invoice_number: string
+          payment_proof_url: string | null
+          plan: string
+          status: Database["public"]["Enums"]["invoice_status"]
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date: string
+          id?: string
+          invoice_date?: string
+          invoice_number: string
+          payment_proof_url?: string | null
+          plan: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          payment_proof_url?: string | null
+          plan?: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       mobiles: {
         Row: {
           brand: string
@@ -310,6 +361,7 @@ export type Database = {
         Args: { _required_tier: string; _user_id: string }
         Returns: boolean
       }
+      generate_invoice_number: { Args: never; Returns: string }
       get_expiring_subscriptions: {
         Args: { days_ahead?: number }
         Returns: {
@@ -338,6 +390,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      invoice_status: "UNPAID" | "PAID" | "EXPIRED"
       mobile_condition: "new" | "excellent" | "good" | "fair" | "poor"
       payment_status: "pending" | "paid" | "partial" | "cancelled"
       subscription_tier: "basic" | "standard" | "premium"
@@ -469,6 +522,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      invoice_status: ["UNPAID", "PAID", "EXPIRED"],
       mobile_condition: ["new", "excellent", "good", "fair", "poor"],
       payment_status: ["pending", "paid", "partial", "cancelled"],
       subscription_tier: ["basic", "standard", "premium"],

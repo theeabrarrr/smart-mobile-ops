@@ -67,34 +67,69 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
   const handleUpgrade = async (planId: string) => {
     if (!user) return;
     
+    if (planId === 'basic') {
+      toast({
+        title: "Error",
+        description: "Cannot downgrade to free plan. Please contact admin.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setProcessing(planId);
     
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Update subscription tier
-      const { error } = await supabase
+      // Get user profile for invoice
+      const { data: profile } = await supabase
         .from('profiles')
-        .update({ 
-          subscription_tier: planId as 'basic' | 'standard' | 'premium',
-          subscription_expires_at: planId !== 'basic' ? 
-            new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : null
-        })
-        .eq('user_id', user.id);
+        .select('full_name, business_name')
+        .eq('user_id', user.id)
+        .single();
 
-      if (error) throw error;
+      // Get plan details
+      const plan = plans.find(p => p.id === planId);
+      if (!plan) throw new Error('Plan not found');
+
+      // Extract numeric price (remove PKR and /month, get first number)
+      const priceMatch = plan.price.match(/\d+/);
+      const price = priceMatch ? parseInt(priceMatch[0]) : 0;
+
+      // Generate invoice number using RPC
+      const { data: invoiceNumber, error: invoiceNumberError } = await supabase
+        .rpc('generate_invoice_number');
+
+      if (invoiceNumberError) throw invoiceNumberError;
+
+      // Create invoice
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 3); // 3 days to pay
+
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .insert({
+          invoice_number: invoiceNumber,
+          user_id: user.id,
+          plan: planId,
+          amount: price,
+          status: 'UNPAID',
+          due_date: dueDate.toISOString()
+        })
+        .select()
+        .single();
+
+      if (invoiceError) throw invoiceError;
 
       toast({
-        title: "Subscription Updated!",
-        description: `Successfully upgraded to ${planId} plan`,
+        title: "Invoice Generated!",
+        description: "Please complete payment to activate your plan.",
       });
       
-      onTierChange();
-    } catch (error) {
+      // Navigate to invoice page
+      window.location.href = `/invoice/${invoice.id}`;
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update subscription",
+        description: error.message || 'Failed to create invoice',
         variant: "destructive"
       });
     } finally {
