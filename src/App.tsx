@@ -17,6 +17,11 @@ import AIAssistant from "./pages/AIAssistant";
 import Profile from "./pages/Profile";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import NotFound from "./pages/NotFound";
+import { AdminRoute } from "./components/AdminRoute";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UsersManagement from "./pages/admin/UsersManagement";
+import SubscriptionManager from "./pages/admin/SubscriptionManager";
+import SystemLogs from "./pages/admin/SystemLogs";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +75,34 @@ const App = () => (
               <DashboardLayout>
                 <Profile />
               </DashboardLayout>
+            } />
+            <Route path="/admin" element={
+              <AdminRoute>
+                <DashboardLayout>
+                  <AdminDashboard />
+                </DashboardLayout>
+              </AdminRoute>
+            } />
+            <Route path="/admin/users" element={
+              <AdminRoute>
+                <DashboardLayout>
+                  <UsersManagement />
+                </DashboardLayout>
+              </AdminRoute>
+            } />
+            <Route path="/admin/subscriptions" element={
+              <AdminRoute>
+                <DashboardLayout>
+                  <SubscriptionManager />
+                </DashboardLayout>
+              </AdminRoute>
+            } />
+            <Route path="/admin/logs" element={
+              <AdminRoute>
+                <DashboardLayout>
+                  <SystemLogs />
+                </DashboardLayout>
+              </AdminRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

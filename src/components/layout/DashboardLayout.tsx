@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { useLocation } from 'react-router-dom';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { ExpiryWarningBanner } from '@/components/ExpiryWarningBanner';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -71,6 +72,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4">
+            <ExpiryWarningBanner />
             {children}
           </main>
         </SidebarInset>

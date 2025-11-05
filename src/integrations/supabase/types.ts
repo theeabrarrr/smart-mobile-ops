@@ -250,6 +250,57 @@ export type Database = {
           },
         ]
       }
+      subscription_logs: {
+        Row: {
+          action: string
+          created_at: string
+          from_tier: string | null
+          id: string
+          reason: string | null
+          to_tier: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          from_tier?: string | null
+          id?: string
+          reason?: string | null
+          to_tier?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          from_tier?: string | null
+          id?: string
+          reason?: string | null
+          to_tier?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -259,9 +310,34 @@ export type Database = {
         Args: { _required_tier: string; _user_id: string }
         Returns: boolean
       }
+      get_expiring_subscriptions: {
+        Args: { days_ahead?: number }
+        Returns: {
+          days_remaining: number
+          email: string
+          expires_at: string
+          full_name: string
+          subscription_tier: string
+          user_id: string
+        }[]
+      }
       get_user_mobile_count: { Args: { _user_id: string }; Returns: number }
+      handle_subscription_expiry: {
+        Args: never
+        Returns: {
+          downgraded_count: number
+        }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "user"
       mobile_condition: "new" | "excellent" | "good" | "fair" | "poor"
       payment_status: "pending" | "paid" | "partial" | "cancelled"
       subscription_tier: "basic" | "standard" | "premium"
@@ -392,6 +468,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       mobile_condition: ["new", "excellent", "good", "fair", "poor"],
       payment_status: ["pending", "paid", "partial", "cancelled"],
       subscription_tier: ["basic", "standard", "premium"],

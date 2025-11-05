@@ -24,8 +24,10 @@ import {
   Bot,
   User,
   LogOut,
-  Crown
+  Crown,
+  Shield
 } from 'lucide-react';
+import { useAdminRole } from '@/hooks/useAdminRole';
 
 interface Profile {
   subscription_tier: 'basic' | 'standard' | 'premium';
@@ -36,6 +38,7 @@ export const AppSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const { isAdmin } = useAdminRole();
 
   useEffect(() => {
     if (user) {
@@ -102,6 +105,29 @@ export const AppSidebar = () => {
     }
   ];
 
+  const adminMenuItems = [
+    {
+      title: 'Admin Dashboard',
+      icon: Shield,
+      path: '/admin'
+    },
+    {
+      title: 'Users Management',
+      icon: Users,
+      path: '/admin/users'
+    },
+    {
+      title: 'Subscriptions',
+      icon: Crown,
+      path: '/admin/subscriptions'
+    },
+    {
+      title: 'System Logs',
+      icon: FileText,
+      path: '/admin/logs'
+    }
+  ];
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
@@ -164,6 +190,30 @@ export const AppSidebar = () => {
               </SidebarMenuItem>
             );
           })}
+          
+          {isAdmin && (
+            <>
+              <div className="px-2 py-2 text-xs font-semibold text-muted-foreground group-data-[collapsible=icon]:hidden">
+                Admin Panel
+              </div>
+              {adminMenuItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      onClick={() => navigate(item.path)}
+                      className={`${isActive ? 'bg-sidebar-accent' : ''} text-yellow-500`}
+                      tooltip={item.title}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </>
+          )}
         </SidebarMenu>
       </SidebarContent>
 
