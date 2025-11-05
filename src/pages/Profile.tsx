@@ -171,8 +171,8 @@ export default function Profile() {
       const plan = subscriptionPlans.find(p => p.tier === planTier);
       if (!plan) throw new Error('Plan not found');
 
-      // Extract numeric price (remove PKR and /month, get first number)
-      const priceMatch = plan.price.match(/\d+/);
+      // Extract numeric price (remove commas, PKR and /month)
+      const priceMatch = plan.price.replace(/,/g, '').match(/\d+/);
       const price = priceMatch ? parseInt(priceMatch[0]) : 0;
 
       // Generate invoice number using RPC

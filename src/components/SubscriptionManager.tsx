@@ -90,8 +90,8 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
       const plan = plans.find(p => p.id === planId);
       if (!plan) throw new Error('Plan not found');
 
-      // Extract numeric price (remove PKR and /month, get first number)
-      const priceMatch = plan.price.match(/\d+/);
+      // Extract numeric price (remove commas, PKR and /month)
+      const priceMatch = plan.price.replace(/,/g, '').match(/\d+/);
       const price = priceMatch ? parseInt(priceMatch[0]) : 0;
 
       // Generate invoice number using RPC

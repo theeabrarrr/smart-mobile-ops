@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Upload, Building2, User, Calendar, DollarSign, CreditCard } from 'lucide-react';
+import { Upload, Building2, User, Calendar, Banknote, CreditCard } from 'lucide-react';
 
 interface Invoice {
   id: string;
@@ -178,8 +178,8 @@ export const InvoiceView = ({ invoice, userProfile, onUpdate }: InvoiceViewProps
                 <p className="text-sm text-muted-foreground">30 days subscription</p>
               </div>
               <div className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-muted-foreground" />
-                <p className="text-2xl font-bold">Rs. {invoice.amount.toLocaleString()}</p>
+                <Banknote className="h-5 w-5 text-muted-foreground" />
+                <p className="text-2xl font-bold">PKR {invoice.amount.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -227,7 +227,7 @@ export const InvoiceView = ({ invoice, userProfile, onUpdate }: InvoiceViewProps
             
             <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded">
               <p className="text-sm font-medium">
-                ⚠️ Please pay the exact amount of Rs. {invoice.amount.toLocaleString()} to activate your plan.
+                ⚠️ Please pay the exact amount of PKR {invoice.amount.toLocaleString()} to activate your plan.
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 After payment, upload your payment proof or enter transaction ID below.
