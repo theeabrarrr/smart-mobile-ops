@@ -37,9 +37,8 @@ interface ReportData {
 
 export default function Reports() {
   const { user } = useAuth();
-  const { tier, features } = useSubscription();
+  const { tier, features, loading: subscriptionLoading } = useSubscription();
   const { toast } = useToast();
-  const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
   const [reportData, setReportData] = useState<ReportData>({
     totalSales: 0,
     totalPurchases: 0,
@@ -55,18 +54,17 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      setLoading(false);
+    if (!user || subscriptionLoading) {
+      setLoading(subscriptionLoading);
       return;
     }
 
-    if (!canAccessFeature(tier, 'reports')) {
-      setShowUpgradeAlert(true);
+    if (!features.canAccessReports) {
       setLoading(false);
       return;
     }
     fetchReportData();
-  }, [user, tier]);
+  }, [user, tier, subscriptionLoading, features.canAccessReports]);
 
   const fetchReportData = async () => {
     try {
@@ -163,7 +161,7 @@ export default function Reports() {
 
   if (!features.canAccessReports) {
     return (
-      <AlertDialog open={showUpgradeAlert} onOpenChange={setShowUpgradeAlert}>
+      <AlertDialog open={true} onOpenChange={() => window.location.href = '/dashboard'}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
