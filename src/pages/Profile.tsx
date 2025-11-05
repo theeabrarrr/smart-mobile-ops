@@ -7,11 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { User, Crown, Check, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import CustomReports from '@/components/CustomReports';
 import { profileSchema } from '@/lib/validationSchemas';
+import { useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -26,39 +26,40 @@ interface Profile {
 const subscriptionPlans = [
   {
     tier: 'basic',
-    name: 'Basic',
+    name: 'Free',
     price: 'Free',
     features: [
-      'Customer Management',
-      'Mobile Inventory',
-      'Sales Recording',
-      'Purchase Tracking',
-      'Basic Dashboard'
+      'Up to 20 mobiles only',
+      'Basic customer management',
+      'Simple sales tracking',
+      'No profit tracking',
+      'No export or reports'
     ]
   },
   {
     tier: 'standard',
     name: 'Standard',
-    price: 'PKR 799',
+    price: 'PKR 799/month',
     features: [
-      'Everything in Basic',
-      'Advanced Reports',
-      'Sales Analytics',
-      'Export Data',
-      'Email Support'
+      'Unlimited inventory',
+      'Profit tracking on dashboard',
+      'Per-sale profit calculation',
+      'Seller CNIC & Phone tracking',
+      'Standard reports',
+      'CSV data export'
     ]
   },
   {
     tier: 'premium',
     name: 'Premium',
-    price: 'PKR 1,499',
+    price: 'PKR 1,499/month',
     features: [
       'Everything in Standard',
-      'AI Assistant',
-      'Predictive Analytics',
-      'Priority Support',
-      'Custom Reports',
-      'API Access'
+      'AI Business Assistant',
+      'Bulk stock purchase',
+      'Custom date-range reports',
+      'Advanced analytics',
+      'Priority support'
     ]
   }
 ];
@@ -66,10 +67,10 @@ const subscriptionPlans = [
 export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string>('');
+  const [processing, setProcessing] = useState(false);
   const [formData, setFormData] = useState({
     full_name: '',
     business_name: '',
@@ -151,49 +152,69 @@ export default function Profile() {
     }
   };
 
-  const handleUpgrade = (tier: string) => {
-    setSelectedPlan(tier);
-    setUpgradeDialogOpen(true);
-  };
-
-  const processFakePayment = async () => {
-    // Simulate payment processing
-    const paymentSuccess = Math.random() > 0.1; // 90% success rate
+  const handleUpgrade = async (planTier: string) => {
+    if (!user) return;
     
-    if (paymentSuccess) {
-      try {
-        const expiresAt = new Date();
-        expiresAt.setMonth(expiresAt.getMonth() + 1); // 1 month from now
-        
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            subscription_tier: selectedPlan as 'basic' | 'standard' | 'premium',
-            subscription_expires_at: expiresAt.toISOString()
-          })
-          .eq('user_id', user?.id);
-        
-        if (error) throw error;
-        
-        fetchProfile();
-        setUpgradeDialogOpen(false);
-        toast({
-          title: "Payment Successful!",
-          description: `You have successfully upgraded to ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan.`
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to update subscription",
-          variant: "destructive"
-        });
-      }
-    } else {
+    if (planTier === 'basic') {
       toast({
-        title: "Payment Failed",
-        description: "Payment processing failed. Please try again.",
+        title: "Error",
+        description: "Cannot downgrade to free plan. Please contact admin.",
         variant: "destructive"
       });
+      return;
+    }
+    
+    setProcessing(true);
+    
+    try {
+      // Get plan details
+      const plan = subscriptionPlans.find(p => p.tier === planTier);
+      if (!plan) throw new Error('Plan not found');
+
+      // Extract numeric price (remove PKR and /month, get first number)
+      const priceMatch = plan.price.match(/\d+/);
+      const price = priceMatch ? parseInt(priceMatch[0]) : 0;
+
+      // Generate invoice number using RPC
+      const { data: invoiceNumber, error: invoiceNumberError } = await supabase
+        .rpc('generate_invoice_number');
+
+      if (invoiceNumberError) throw invoiceNumberError;
+
+      // Create invoice
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 3); // 3 days to pay
+
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .insert({
+          invoice_number: invoiceNumber,
+          user_id: user.id,
+          plan: planTier,
+          amount: price,
+          status: 'UNPAID',
+          due_date: dueDate.toISOString()
+        })
+        .select()
+        .single();
+
+      if (invoiceError) throw invoiceError;
+
+      toast({
+        title: "Invoice Generated!",
+        description: "Please complete payment to activate your plan.",
+      });
+      
+      // Navigate to invoice page
+      navigate(`/invoice/${invoice.id}`);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || 'Failed to create invoice',
+        variant: "destructive"
+      });
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -350,8 +371,9 @@ export default function Profile() {
                       onClick={() => handleUpgrade(plan.tier)}
                       className="w-full"
                       variant={plan.tier === 'premium' ? 'default' : 'outline'}
+                      disabled={processing}
                     >
-                      {plan.tier === 'basic' ? 'Downgrade' : 'Upgrade'}
+                      {processing ? 'Processing...' : (plan.tier === 'basic' ? 'Contact Admin' : 'Upgrade')}
                     </Button>
                   )}
                 </CardContent>
@@ -365,51 +387,6 @@ export default function Profile() {
       {profile?.subscription_tier === 'premium' && (
         <CustomReports userSubscriptionTier={profile.subscription_tier} />
       )}
-
-      {/* Fake Payment Dialog */}
-      <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upgrade Subscription</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-semibold">
-                {subscriptionPlans.find(p => p.tier === selectedPlan)?.name} Plan
-              </h3>
-              <p className="text-2xl font-bold">
-                {subscriptionPlans.find(p => p.tier === selectedPlan)?.price}
-                {selectedPlan !== 'basic' && <span className="text-sm font-normal">/month</span>}
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-semibold">Payment Method (Demo)</h4>
-              <div className="p-3 border rounded bg-yellow-50 border-yellow-200">
-                <p className="text-sm text-yellow-800">
-                  This is a demo payment system. No real payment will be processed.
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                onClick={processFakePayment}
-                className="flex-1"
-              >
-                Complete Payment (Demo)
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setUpgradeDialogOpen(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
