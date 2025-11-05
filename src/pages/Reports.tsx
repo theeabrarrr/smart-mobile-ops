@@ -62,7 +62,7 @@ export default function Reports() {
       }
       fetchReportData();
     }
-  }, [user, features]);
+  }, [user, features.canAccessReports]);
 
   const fetchReportData = async () => {
     try {
