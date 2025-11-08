@@ -38,12 +38,9 @@ export default function AIAssistant() {
 
   useEffect(() => {
     if (user) {
-      if (!canAccessFeature(tier, 'ai_assistant')) {
-        setShowUpgradeDialog(true);
-      }
       fetchBusinessStats();
     }
-  }, [user, tier]);
+  }, [user]);
 
   const fetchBusinessStats = async () => {
     try {
@@ -324,13 +321,6 @@ export default function AIAssistant() {
         </Card>
       </div>
 
-      {/* Upgrade Dialog */}
-      <UpgradeDialog
-        open={showUpgradeDialog}
-        onOpenChange={setShowUpgradeDialog}
-        message={getUpgradeMessage(tier, 'ai_assistant')}
-      />
-
       {/* Features */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <Card>
@@ -353,6 +343,7 @@ export default function AIAssistant() {
         </Card>
       </div>
 
+      {/* Upgrade Dialog */}
       <UpgradeDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
