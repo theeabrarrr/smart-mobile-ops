@@ -142,7 +142,7 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
   };
 
   const generateProfitAnalysisReport = async (fromDate?: string, toDate?: string) => {
-    // Get sales data
+    // Get sales data with purchase prices
     const salesQuery = supabase
       .from('sales')
       .select(`
@@ -173,6 +173,25 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
     const grossProfit = totalRevenue - totalCosts;
     const profitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
 
+    // Calculate per-sale profitability
+    const salesWithProfit = salesData?.map(sale => {
+      const purchasePrice = sale.mobiles?.purchase_price || 0;
+      const profit = Number(sale.sale_price) - purchasePrice;
+      const margin = purchasePrice > 0 ? (profit / purchasePrice) * 100 : 0;
+      return {
+        ...sale,
+        profit,
+        margin,
+        purchasePrice
+      };
+    }) || [];
+
+    // Sort by profit to find most and least profitable
+    const sortedByProfit = [...salesWithProfit].sort((a, b) => b.profit - a.profit);
+    const mostProfitable = sortedByProfit.slice(0, 5);
+    const leastProfitable = sortedByProfit.slice(-5).reverse();
+    const lowMarginSales = salesWithProfit.filter(s => s.margin < 10 && s.margin >= 0);
+
     return {
       type: 'Profit Analysis',
       period: `${fromDate} to ${toDate}`,
@@ -180,9 +199,14 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
         totalRevenue,
         totalCosts,
         grossProfit,
-        profitMargin
+        profitMargin,
+        avgProfitPerSale: salesWithProfit.length > 0 ? salesWithProfit.reduce((sum, s) => sum + s.profit, 0) / salesWithProfit.length : 0,
+        lowMarginSalesCount: lowMarginSales.length
       },
-      salesData: salesData?.slice(0, 10),
+      mostProfitable,
+      leastProfitable,
+      lowMarginSales: lowMarginSales.slice(0, 10),
+      salesData: salesWithProfit.slice(0, 10),
       purchasesData: purchasesData?.slice(0, 10)
     };
   };
@@ -388,6 +412,46 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
                   </div>
                 ))}
               </div>
+              
+              {/* Most Profitable Sales */}
+              {reportData.mostProfitable && (
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                    Most Profitable Sales
+                  </h4>
+                  <div className="space-y-2">
+                    {reportData.mostProfitable.map((sale: any, index: number) => (
+                      <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
+                        <div>
+                          <span className="font-medium">{sale.mobiles?.brand} {sale.mobiles?.model}</span>
+                          <p className="text-xs text-muted-foreground">{new Date(sale.sale_date).toLocaleDateString()}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-green-600">PKR {sale.profit.toLocaleString()}</div>
+                          <Badge variant="default" className="text-xs">{sale.margin.toFixed(1)}%</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Low Margin Sales Alert */}
+              {reportData.lowMarginSales && reportData.lowMarginSales.length > 0 && (
+                <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <h4 className="font-semibold mb-2 text-orange-800">⚠️ Low Margin Sales ({reportData.lowMarginSales.length})</h4>
+                  <p className="text-sm text-orange-700 mb-2">These sales have profit margins below 10%</p>
+                  <div className="space-y-2">
+                    {reportData.lowMarginSales.slice(0, 3).map((sale: any, index: number) => (
+                      <div key={index} className="flex justify-between items-center p-2 bg-white rounded text-sm">
+                        <span>{sale.mobiles?.brand} {sale.mobiles?.model}</span>
+                        <Badge variant="outline" className="text-orange-600">{sale.margin.toFixed(1)}%</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               {reportData.topCustomers && (
                 <div>

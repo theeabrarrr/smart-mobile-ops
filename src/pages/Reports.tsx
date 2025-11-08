@@ -25,7 +25,7 @@ interface ReportData {
     sale_price: number;
     sale_date: string;
     payment_status: string;
-    mobiles: { brand: string; model: string };
+    mobiles: { brand: string; model: string; purchase_price: number | null };
     customers: { name: string };
   }>;
   topMobiles: Array<{
@@ -78,7 +78,7 @@ export default function Reports() {
           sale_price,
           sale_date,
           payment_status,
-          mobiles(brand, model),
+          mobiles(brand, model, purchase_price),
           customers(name)
         `)
         .order('sale_date', { ascending: false });
@@ -290,20 +290,45 @@ export default function Reports() {
           <CardContent>
             <div className="space-y-3">
               {reportData.recentSales.length > 0 ? (
-                reportData.recentSales.map((sale) => (
-                  <div key={sale.id} className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                    <div>
-                      <p className="font-medium">{sale.mobiles.brand} {sale.mobiles.model}</p>
-                      <p className="text-sm text-muted-foreground">{sale.customers.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(sale.sale_date).toLocaleDateString()}
-                      </p>
+                reportData.recentSales.map((sale) => {
+                  const profit = sale.mobiles.purchase_price !== null 
+                    ? sale.sale_price - sale.mobiles.purchase_price 
+                    : null;
+                  const profitMargin = profit !== null && sale.mobiles.purchase_price 
+                    ? (profit / sale.mobiles.purchase_price * 100).toFixed(1) 
+                    : null;
+                  
+                  return (
+                    <div key={sale.id} className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                      <div>
+                        <p className="font-medium">{sale.mobiles.brand} {sale.mobiles.model}</p>
+                        <p className="text-sm text-muted-foreground">{sale.customers.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(sale.sale_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-green-600">PKR {sale.sale_price.toLocaleString()}</p>
+                        {profit !== null && (
+                          <>
+                            <p className={`text-sm font-semibold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              Profit: PKR {profit.toLocaleString()}
+                            </p>
+                            {profitMargin && (
+                              <Badge variant={
+                                parseFloat(profitMargin) > 20 ? 'default' : 
+                                parseFloat(profitMargin) > 10 ? 'secondary' : 
+                                'outline'
+                              } className="text-xs">
+                                {profitMargin}%
+                              </Badge>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-green-600">PKR {sale.sale_price.toLocaleString()}</p>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-muted-foreground text-center py-4">No sales recorded yet</p>
               )}

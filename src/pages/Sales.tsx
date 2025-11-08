@@ -28,6 +28,7 @@ interface Sale {
   mobiles: {
     brand: string;
     model: string;
+    purchase_price: number | null;
   };
   customers: {
     name: string;
@@ -81,7 +82,7 @@ export default function Sales() {
         .from('sales')
         .select(`
           *,
-          mobiles(brand, model),
+          mobiles(brand, model, purchase_price),
           customers(name)
         `)
         .order('created_at', { ascending: false });
@@ -328,15 +329,25 @@ export default function Sales() {
   if (loading) return <div className="p-6">Loading...</div>;
 
   const totalSales = sales.reduce((sum, sale) => sum + sale.sale_price, 0);
+  const totalPurchaseCost = sales.reduce((sum, sale) => sum + (sale.mobiles.purchase_price || 0), 0);
+  const totalProfit = totalSales - totalPurchaseCost;
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Sales</h1>
-          <p className="text-muted-foreground mt-1">
-            Total Sales: PKR {totalSales.toLocaleString()} | Records: {sales.length}
-          </p>
+          <div className="flex gap-4 mt-1">
+            <p className="text-muted-foreground">
+              Total Sales: PKR {totalSales.toLocaleString()}
+            </p>
+            <p className="text-muted-foreground">
+              Total Profit: <span className={totalProfit >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                PKR {totalProfit.toLocaleString()}
+              </span>
+            </p>
+            <p className="text-muted-foreground">Records: {sales.length}</p>
+          </div>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -509,7 +520,44 @@ export default function Sales() {
                 <p><strong>Mobile:</strong> {sale.mobiles.brand} {sale.mobiles.model}</p>
                 <p><strong>Customer:</strong> {sale.customers.name}</p>
                 <p><strong>Date:</strong> {new Date(sale.sale_date).toLocaleDateString()}</p>
-                <div className="flex justify-between items-center">
+                
+                {/* Profit calculation and display */}
+                {sale.mobiles.purchase_price !== null && (
+                  <div className="pt-2 border-t">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Sale Price:</span>
+                      <span className="font-medium">PKR {sale.sale_price.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Purchase Cost:</span>
+                      <span className="font-medium">PKR {sale.mobiles.purchase_price.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between font-semibold mt-1">
+                      <span>Profit:</span>
+                      <span className={sale.sale_price - sale.mobiles.purchase_price >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        PKR {(sale.sale_price - sale.mobiles.purchase_price).toLocaleString()}
+                        {' '}
+                        ({((sale.sale_price - sale.mobiles.purchase_price) / sale.mobiles.purchase_price * 100).toFixed(1)}%)
+                      </span>
+                    </div>
+                    <div className="mt-1">
+                      {(() => {
+                        const margin = ((sale.sale_price - sale.mobiles.purchase_price) / sale.mobiles.purchase_price * 100);
+                        return margin > 20 ? (
+                          <Badge className="bg-green-600 text-white">High Profit</Badge>
+                        ) : margin > 10 ? (
+                          <Badge className="bg-yellow-600 text-white">Medium Profit</Badge>
+                        ) : margin >= 0 ? (
+                          <Badge className="bg-orange-600 text-white">Low Profit</Badge>
+                        ) : (
+                          <Badge variant="destructive">Loss</Badge>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center pt-2">
                   <Badge variant={
                     sale.payment_status === 'paid' ? 'default' :
                     sale.payment_status === 'partial' ? 'secondary' : 'destructive'
@@ -518,7 +566,7 @@ export default function Sales() {
                   </Badge>
                 </div>
                 {sale.notes && (
-                  <p><strong>Notes:</strong> {sale.notes}</p>
+                  <p className="text-xs"><strong>Notes:</strong> {sale.notes}</p>
                 )}
               </div>
             </CardContent>
