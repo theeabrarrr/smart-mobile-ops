@@ -21,12 +21,7 @@ interface Mobile {
   model: string;
   imei?: string;
   condition: string;
-  purchase_price?: number;
   selling_price?: number;
-  purchase_date?: string;
-  supplier_name?: string;
-  seller_cnic?: string;
-  seller_phone?: string;
   notes?: string;
   is_sold: boolean;
   created_at: string;
@@ -46,12 +41,7 @@ export default function Inventory() {
     model: '',
     imei: '',
     condition: 'good',
-    purchase_price: '',
     selling_price: '',
-    purchase_date: '',
-    supplier_name: '',
-    seller_cnic: '',
-    seller_phone: '',
     notes: ''
   });
 
@@ -119,12 +109,7 @@ export default function Inventory() {
         model: validation.data.model,
         imei: validation.data.imei || null,
         condition: validation.data.condition as 'excellent' | 'good' | 'fair' | 'poor',
-        purchase_price: validation.data.purchase_price ? parseFloat(validation.data.purchase_price) : null,
         selling_price: validation.data.selling_price ? parseFloat(validation.data.selling_price) : null,
-        purchase_date: validation.data.purchase_date || null,
-        supplier_name: validation.data.supplier_name || null,
-        seller_cnic: features.canTrackSellerInfo ? (validation.data.seller_cnic || null) : null,
-        seller_phone: features.canTrackSellerInfo ? (validation.data.seller_phone || null) : null,
         notes: validation.data.notes || null,
         user_id: user?.id
       };
@@ -184,12 +169,7 @@ export default function Inventory() {
       model: '',
       imei: '',
       condition: 'good',
-      purchase_price: '',
       selling_price: '',
-      purchase_date: '',
-      supplier_name: '',
-      seller_cnic: '',
-      seller_phone: '',
       notes: ''
     });
     setEditingMobile(null);
@@ -202,12 +182,7 @@ export default function Inventory() {
       model: mobile.model,
       imei: mobile.imei || '',
       condition: mobile.condition,
-      purchase_price: mobile.purchase_price?.toString() || '',
       selling_price: mobile.selling_price?.toString() || '',
-      purchase_date: mobile.purchase_date || '',
-      supplier_name: mobile.supplier_name || '',
-      seller_cnic: mobile.seller_cnic || '',
-      seller_phone: mobile.seller_phone || '',
       notes: mobile.notes || ''
     });
     setIsDialogOpen(true);
@@ -280,69 +255,15 @@ export default function Inventory() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="purchase_price">Purchase Price</Label>
-                  <Input
-                    id="purchase_price"
-                    type="number"
-                    value={formData.purchase_price}
-                    onChange={(e) => setFormData({ ...formData, purchase_price: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="selling_price">Selling Price</Label>
-                  <Input
-                    id="selling_price"
-                    type="number"
-                    value={formData.selling_price}
-                    onChange={(e) => setFormData({ ...formData, selling_price: e.target.value })}
-                  />
-                </div>
-              </div>
               <div>
-                <Label htmlFor="purchase_date">Purchase Date</Label>
+                <Label htmlFor="selling_price">Selling Price</Label>
                 <Input
-                  id="purchase_date"
-                  type="date"
-                  value={formData.purchase_date}
-                  onChange={(e) => setFormData({ ...formData, purchase_date: e.target.value })}
+                  id="selling_price"
+                  type="number"
+                  value={formData.selling_price}
+                  onChange={(e) => setFormData({ ...formData, selling_price: e.target.value })}
                 />
               </div>
-              <div>
-                <Label htmlFor="supplier_name">Supplier</Label>
-                <Input
-                  id="supplier_name"
-                  value={formData.supplier_name}
-                  onChange={(e) => setFormData({ ...formData, supplier_name: e.target.value })}
-                />
-              </div>
-              {features.canTrackSellerInfo && (
-                <>
-                  <div>
-                    <Label htmlFor="seller_cnic">
-                      Seller CNIC <Badge variant="outline" className="ml-2">Standard+</Badge>
-                    </Label>
-                    <Input
-                      id="seller_cnic"
-                      placeholder="12345-1234567-1"
-                      value={formData.seller_cnic}
-                      onChange={(e) => setFormData({ ...formData, seller_cnic: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="seller_phone">
-                      Seller Phone <Badge variant="outline" className="ml-2">Standard+</Badge>
-                    </Label>
-                    <Input
-                      id="seller_phone"
-                      placeholder="03XX-XXXXXXX"
-                      value={formData.seller_phone}
-                      onChange={(e) => setFormData({ ...formData, seller_phone: e.target.value })}
-                    />
-                  </div>
-                </>
-              )}
               <div>
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea
@@ -400,17 +321,8 @@ export default function Inventory() {
                 {mobile.imei && (
                   <p><strong>IMEI:</strong> {mobile.imei}</p>
                 )}
-                {mobile.purchase_price && (
-                  <p><strong>Purchase:</strong> PKR {mobile.purchase_price}</p>
-                )}
                 {mobile.selling_price && (
                   <p><strong>Selling:</strong> PKR {mobile.selling_price}</p>
-                )}
-                {mobile.supplier_name && (
-                  <p><strong>Supplier:</strong> {mobile.supplier_name}</p>
-                )}
-                {mobile.purchase_date && (
-                  <p><strong>Purchased:</strong> {new Date(mobile.purchase_date).toLocaleDateString()}</p>
                 )}
                 {mobile.notes && (
                   <p><strong>Notes:</strong> {mobile.notes}</p>

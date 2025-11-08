@@ -142,22 +142,42 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
   };
 
   const generateProfitAnalysisReport = async (fromDate?: string, toDate?: string) => {
-    // Get sales data with purchase prices
+    // Get sales data
     const salesQuery = supabase
       .from('sales')
       .select(`
         sale_price,
         sale_date,
-        mobiles(purchase_price, brand, model)
+        mobile_id,
+        mobiles(brand, model)
       `)
       .eq('user_id', user?.id);
 
     if (fromDate) salesQuery.gte('sale_date', fromDate);
     if (toDate) salesQuery.lte('sale_date', toDate);
 
-    const { data: salesData } = await salesQuery;
+    const { data: sales } = await salesQuery;
+    
+    // Fetch purchases to get purchase_price
+    const { data: purchasesForPrice } = await supabase
+      .from('purchases')
+      .select('mobile_id, purchase_price')
+      .eq('user_id', user?.id);
+    
+    const purchasePriceMap = new Map(
+      purchasesForPrice?.map(p => [p.mobile_id, p.purchase_price]) || []
+    );
+    
+    // Enrich sales with purchase_price
+    const salesData = sales?.map(sale => ({
+      ...sale,
+      mobiles: {
+        ...sale.mobiles,
+        purchase_price: purchasePriceMap.get(sale.mobile_id) || 0
+      }
+    })) || [];
 
-    // Get purchases data
+    // Get purchases data for cost calculation
     const purchasesQuery = supabase
       .from('purchases')
       .select('purchase_price, purchase_date')
@@ -168,14 +188,14 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
 
     const { data: purchasesData } = await purchasesQuery;
 
-    const totalRevenue = salesData?.reduce((sum, sale) => sum + Number(sale.sale_price), 0) || 0;
+    const totalRevenue = salesData.reduce((sum, sale) => sum + Number(sale.sale_price), 0);
     const totalCosts = purchasesData?.reduce((sum, purchase) => sum + Number(purchase.purchase_price), 0) || 0;
     const grossProfit = totalRevenue - totalCosts;
     const profitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
 
     // Calculate per-sale profitability
-    const salesWithProfit = salesData?.map(sale => {
-      const purchasePrice = sale.mobiles?.purchase_price || 0;
+    const salesWithProfit = salesData.map(sale => {
+      const purchasePrice = sale.mobiles.purchase_price || 0;
       const profit = Number(sale.sale_price) - purchasePrice;
       const margin = purchasePrice > 0 ? (profit / purchasePrice) * 100 : 0;
       return {
@@ -184,8 +204,8 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
         margin,
         purchasePrice
       };
-    }) || [];
-
+    });
+    
     // Sort by profit to find most and least profitable
     const sortedByProfit = [...salesWithProfit].sort((a, b) => b.profit - a.profit);
     const mostProfitable = sortedByProfit.slice(0, 5);
@@ -276,7 +296,7 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
       .select(`
         mobile_id,
         sale_date,
-        mobiles(brand, model, purchase_price)
+        mobiles(brand, model)
       `)
       .eq('user_id', user?.id);
 
@@ -285,11 +305,22 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
 
     const { data: salesData } = await salesQuery;
 
+    // Get purchases to check purchase dates
+    const { data: purchasesData } = await supabase
+      .from('purchases')
+      .select('mobile_id, purchase_date')
+      .eq('user_id', user?.id);
+    
+    const purchaseDateMap = new Map(
+      purchasesData?.map(p => [p.mobile_id, p.purchase_date]) || []
+    );
+
     const soldMobiles = new Set(salesData?.map(sale => sale.mobile_id));
     const availableMobiles = mobilesData?.filter(mobile => !mobile.is_sold) || [];
     const slowMovingInventory = availableMobiles.filter(mobile => {
-      const daysSincePurchase = mobile.purchase_date 
-        ? Math.floor((new Date().getTime() - new Date(mobile.purchase_date).getTime()) / (1000 * 60 * 60 * 24))
+      const purchaseDate = purchaseDateMap.get(mobile.id);
+      const daysSincePurchase = purchaseDate 
+        ? Math.floor((new Date().getTime() - new Date(purchaseDate).getTime()) / (1000 * 60 * 60 * 24))
         : 0;
       return daysSincePurchase > 30;
     });

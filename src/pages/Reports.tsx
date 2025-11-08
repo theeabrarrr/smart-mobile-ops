@@ -78,12 +78,22 @@ export default function Reports() {
           sale_price,
           sale_date,
           payment_status,
-          mobiles(brand, model, purchase_price),
+          mobile_id,
+          mobiles(brand, model),
           customers(name)
         `)
         .order('sale_date', { ascending: false });
+      
+      // Fetch purchases to get purchase_price
+      const { data: purchasesForPrice } = await supabase
+        .from('purchases')
+        .select('mobile_id, purchase_price');
+      
+      const purchasePriceMap = new Map(
+        purchasesForPrice?.map(p => [p.mobile_id, p.purchase_price]) || []
+      );
 
-      // Fetch purchases data
+      // Fetch purchases data for cost calculation
       const { data: purchasesData } = await supabase
         .from('purchases')
         .select('purchase_price');
@@ -107,12 +117,21 @@ export default function Reports() {
       
       const pendingPayments = salesData?.filter(sale => sale.payment_status === 'pending').length || 0;
       
+      // Enrich recent sales with purchase_price
+      const enrichedSales = salesData?.map(sale => ({
+        ...sale,
+        mobiles: {
+          ...sale.mobiles,
+          purchase_price: purchasePriceMap.get(sale.mobile_id) || null
+        }
+      })) || [];
+      
       // Get recent sales (last 5)
-      const recentSales = salesData?.slice(0, 5) || [];
+      const recentSales = enrichedSales.slice(0, 5);
 
       // Get top mobile brands/models
       const mobileCounts: { [key: string]: number } = {};
-      salesData?.forEach(sale => {
+      enrichedSales.forEach(sale => {
         const key = `${sale.mobiles.brand} ${sale.mobiles.model}`;
         mobileCounts[key] = (mobileCounts[key] || 0) + 1;
       });

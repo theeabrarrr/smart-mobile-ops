@@ -111,12 +111,7 @@ export type Database = {
           is_sold: boolean
           model: string
           notes: string | null
-          purchase_date: string | null
-          purchase_price: number | null
-          seller_cnic: string | null
-          seller_phone: string | null
           selling_price: number | null
-          supplier_name: string | null
           updated_at: string
           user_id: string
         }
@@ -129,12 +124,7 @@ export type Database = {
           is_sold?: boolean
           model: string
           notes?: string | null
-          purchase_date?: string | null
-          purchase_price?: number | null
-          seller_cnic?: string | null
-          seller_phone?: string | null
           selling_price?: number | null
-          supplier_name?: string | null
           updated_at?: string
           user_id: string
         }
@@ -147,12 +137,7 @@ export type Database = {
           is_sold?: boolean
           model?: string
           notes?: string | null
-          purchase_date?: string | null
-          purchase_price?: number | null
-          seller_cnic?: string | null
-          seller_phone?: string | null
           selling_price?: number | null
-          supplier_name?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -328,6 +313,33 @@ export type Database = {
           reason?: string | null
           to_tier?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id: string
+          name: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+          updated_at?: string
         }
         Relationships: []
       }

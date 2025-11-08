@@ -109,21 +109,33 @@ const Dashboard = () => {
         .eq('user_id', user.id)
         .eq('is_sold', false);
 
-      // Fetch sales count and revenue
+      // Fetch sales with mobile_id for profit calculation
       const { data: salesData } = await supabase
         .from('sales')
-        .select('sale_price')
+        .select('sale_price, mobile_id')
         .eq('user_id', user.id);
 
-      // Fetch purchases for profit calculation
+      // Fetch purchases for sold items only
+      const soldMobileIds = salesData?.map(sale => sale.mobile_id) || [];
+      
       const { data: purchasesData } = await supabase
         .from('purchases')
-        .select('purchase_price')
-        .eq('user_id', user.id);
+        .select('purchase_price, mobile_id')
+        .eq('user_id', user.id)
+        .in('mobile_id', soldMobileIds);
 
       const totalSales = salesData?.length || 0;
       const totalRevenue = salesData?.reduce((sum, sale) => sum + Number(sale.sale_price), 0) || 0;
-      const totalPurchases = purchasesData?.reduce((sum, purchase) => sum + Number(purchase.purchase_price), 0) || 0;
+      
+      // Calculate total purchase cost for sold items only
+      const purchasePriceMap = new Map(
+        purchasesData?.map(p => [p.mobile_id, p.purchase_price]) || []
+      );
+      
+      const totalPurchases = salesData?.reduce((sum, sale) => {
+        return sum + (purchasePriceMap.get(sale.mobile_id) || 0);
+      }, 0) || 0;
+      
       const totalProfit = totalRevenue - totalPurchases;
 
       setStats({

@@ -80,17 +80,38 @@ export default function Sales() {
 
   const fetchSales = async () => {
     try {
+      // Fetch sales with customer and mobile info
       const { data, error } = await supabase
         .from('sales')
         .select(`
           *,
-          mobiles(brand, model, purchase_price),
+          mobiles(brand, model),
           customers(name)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSales(data || []);
+      
+      // Fetch purchases to get purchase_price
+      const { data: purchasesData } = await supabase
+        .from('purchases')
+        .select('mobile_id, purchase_price');
+      
+      // Create a map of mobile_id to purchase_price
+      const purchasePriceMap = new Map(
+        purchasesData?.map(p => [p.mobile_id, p.purchase_price]) || []
+      );
+      
+      // Merge purchase_price into sales data
+      const enrichedSales = data?.map(sale => ({
+        ...sale,
+        mobiles: {
+          ...sale.mobiles,
+          purchase_price: purchasePriceMap.get(sale.mobile_id) || null
+        }
+      })) || [];
+      
+      setSales(enrichedSales);
     } catch (error) {
       toast({
         title: "Error",

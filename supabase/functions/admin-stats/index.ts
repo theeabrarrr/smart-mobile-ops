@@ -89,11 +89,16 @@ serve(async (req: Request) => {
       .select("*", { count: "exact", head: true })
       .gte("created_at", thirtyDaysAgo.toISOString());
 
-    // Calculate MRR (Monthly Recurring Revenue) - assuming prices
-    const prices = { basic: 0, standard: 50, premium: 100 }; // Example prices
+    // Calculate MRR (Monthly Recurring Revenue) from subscription_plans table
+    const { data: plansData } = await supabase
+      .from("subscription_plans")
+      .select("id, price");
+    
+    const pricesMap = new Map(plansData?.map(p => [p.id, p.price]) || []);
+    
     const mrr = 
-      tierCounts.standard * prices.standard + 
-      tierCounts.premium * prices.premium;
+      tierCounts.standard * (pricesMap.get('standard') || 0) + 
+      tierCounts.premium * (pricesMap.get('premium') || 0);
 
     // Get total inventory count across all users
     const { count: totalInventory } = await supabase

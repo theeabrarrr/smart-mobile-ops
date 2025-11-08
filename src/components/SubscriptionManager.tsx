@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,58 +13,94 @@ interface SubscriptionManagerProps {
   onTierChange: () => void;
 }
 
-const plans = [
-  {
-    id: 'basic',
-    name: 'Free',
-    price: 'Free',
-    features: [
-      'Up to 20 mobiles only',
-      'Basic customer management',
-      'Simple sales tracking',
-      'No profit tracking',
-      'No export or reports'
-    ],
-    icon: Star,
-    color: 'bg-blue-500'
-  },
-  {
-    id: 'standard',
-    name: 'Standard',
-    price: 'PKR 799/month',
-    features: [
-      'Unlimited inventory',
-      'Profit tracking on dashboard',
-      'Per-sale profit calculation',
-      'Seller CNIC & Phone tracking',
-      'Standard reports',
-      'CSV data export'
-    ],
-    icon: Crown,
-    color: 'bg-green-500'
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    price: 'PKR 1,499/month',
-    features: [
-      'Everything in Standard',
-      'AI Business Assistant',
-      'Bulk stock purchase',
-      'Custom date-range reports',
-      'Advanced analytics',
-      'Priority support'
-    ],
-    icon: Crown,
-    color: 'bg-purple-500'
-  }
-];
+interface Plan {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  features: string[];
+  icon: any;
+  color: string;
+}
+
+const planFeatures = {
+  basic: [
+    'Up to 20 mobiles only',
+    'Basic customer management',
+    'Simple sales tracking',
+    'No profit tracking',
+    'No export or reports'
+  ],
+  standard: [
+    'Unlimited inventory',
+    'Profit tracking on dashboard',
+    'Per-sale profit calculation',
+    'Seller CNIC & Phone tracking',
+    'Standard reports',
+    'CSV data export'
+  ],
+  premium: [
+    'Everything in Standard',
+    'AI Business Assistant',
+    'Bulk stock purchase',
+    'Custom date-range reports',
+    'Advanced analytics',
+    'Priority support'
+  ]
+};
+
+const planColors = {
+  basic: 'bg-blue-500',
+  standard: 'bg-green-500',
+  premium: 'bg-purple-500'
+};
+
+const planIcons = {
+  basic: Star,
+  standard: Crown,
+  premium: Crown
+};
 
 export default function SubscriptionManager({ currentTier, onTierChange }: SubscriptionManagerProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [processing, setProcessing] = useState<string | null>(null);
+  const [plans, setPlans] = useState<Plan[]>([]);
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subscription_plans')
+        .select('*')
+        .order('price', { ascending: true });
+
+      if (error) throw error;
+
+      const enrichedPlans = data?.map(plan => ({
+        id: plan.id,
+        name: plan.name,
+        price: plan.price,
+        description: plan.description,
+        features: planFeatures[plan.id as keyof typeof planFeatures] || [],
+        icon: planIcons[plan.id as keyof typeof planIcons] || Star,
+        color: planColors[plan.id as keyof typeof planColors] || 'bg-gray-500'
+      })) || [];
+
+      setPlans(enrichedPlans);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load subscription plans",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleUpgrade = async (planId: string) => {
     if (!user) return;
@@ -81,20 +117,9 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
     setProcessing(planId);
     
     try {
-      // Get user profile for invoice
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name, business_name')
-        .eq('user_id', user.id)
-        .single();
-
-      // Get plan details
+      // Get plan details from database
       const plan = plans.find(p => p.id === planId);
       if (!plan) throw new Error('Plan not found');
-
-      // Extract numeric price (remove commas, PKR and /month)
-      const priceMatch = plan.price.replace(/,/g, '').match(/\d+/);
-      const price = priceMatch ? parseInt(priceMatch[0]) : 0;
 
       // Generate invoice number using RPC
       const { data: invoiceNumber, error: invoiceNumberError } = await supabase
@@ -112,7 +137,7 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
           invoice_number: invoiceNumber,
           user_id: user.id,
           plan: planId,
-          amount: price,
+          amount: plan.price,
           status: 'UNPAID',
           due_date: dueDate.toISOString()
         })
@@ -165,7 +190,9 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
                   <Icon className="h-6 w-6 text-white" />
                 </div>
                 <CardTitle>{plan.name}</CardTitle>
-                <CardDescription className="text-2xl font-bold">{plan.price}</CardDescription>
+                <CardDescription className="text-2xl font-bold">
+                  {plan.price === 0 ? 'Free' : `PKR ${plan.price.toLocaleString()}/month`}
+                </CardDescription>
               </CardHeader>
               
               <CardContent className="space-y-4">

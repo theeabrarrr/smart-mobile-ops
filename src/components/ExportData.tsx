@@ -83,22 +83,35 @@ const ExportData = () => {
         case 'inventory':
           const { data: inventoryData } = await supabase
             .from('mobiles')
-            .select('*')
+            .select('id, brand, model, imei, condition, selling_price, is_sold, notes')
             .eq('user_id', user?.id)
             .order('brand');
           
-          data = inventoryData?.map(mobile => ({
-            'Brand': mobile.brand,
-            'Model': mobile.model,
-            'IMEI': mobile.imei || '',
-            'Condition': mobile.condition,
-            'Purchase Price': mobile.purchase_price || '',
-            'Selling Price': mobile.selling_price || '',
-            'Purchase Date': mobile.purchase_date ? new Date(mobile.purchase_date).toLocaleDateString() : '',
-            'Status': mobile.is_sold ? 'Sold' : 'Available',
-            'Supplier': mobile.supplier_name || '',
-            'Notes': mobile.notes || ''
-          }));
+          // Fetch purchases to get purchase info
+          const { data: purchasesForExport } = await supabase
+            .from('purchases')
+            .select('mobile_id, purchase_price, purchase_date, supplier_name')
+            .eq('user_id', user?.id);
+          
+          const purchaseInfoMap = new Map(
+            purchasesForExport?.map(p => [p.mobile_id, p]) || []
+          );
+          
+          data = inventoryData?.map(mobile => {
+            const purchaseInfo = purchaseInfoMap.get(mobile.id);
+            return {
+              'Brand': mobile.brand,
+              'Model': mobile.model,
+              'IMEI': mobile.imei || '',
+              'Condition': mobile.condition,
+              'Purchase Price': purchaseInfo?.purchase_price || '',
+              'Selling Price': mobile.selling_price || '',
+              'Purchase Date': purchaseInfo?.purchase_date ? new Date(purchaseInfo.purchase_date).toLocaleDateString() : '',
+              'Status': mobile.is_sold ? 'Sold' : 'Available',
+              'Supplier': purchaseInfo?.supplier_name || '',
+              'Notes': mobile.notes || ''
+            };
+          });
           filename = 'inventory_export.csv';
           break;
 

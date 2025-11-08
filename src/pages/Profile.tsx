@@ -23,46 +23,31 @@ interface Profile {
   subscription_expires_at?: string;
 }
 
-const subscriptionPlans = [
-  {
-    tier: 'basic',
-    name: 'Free',
-    price: 'Free',
-    features: [
-      'Up to 20 mobiles only',
-      'Basic customer management',
-      'Simple sales tracking',
-      'No profit tracking',
-      'No export or reports'
-    ]
-  },
-  {
-    tier: 'standard',
-    name: 'Standard',
-    price: 'PKR 799/month',
-    features: [
-      'Unlimited inventory',
-      'Profit tracking on dashboard',
-      'Per-sale profit calculation',
-      'Seller CNIC & Phone tracking',
-      'Standard reports',
-      'CSV data export'
-    ]
-  },
-  {
-    tier: 'premium',
-    name: 'Premium',
-    price: 'PKR 1,499/month',
-    features: [
-      'Everything in Standard',
-      'AI Business Assistant',
-      'Bulk stock purchase',
-      'Custom date-range reports',
-      'Advanced analytics',
-      'Priority support'
-    ]
-  }
-];
+interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  features: string[];
+}
+
+const planFeatures = {
+  basic: [
+    'Up to 20 mobiles only',
+    'Basic customer management',
+    'Simple sales tracking'
+  ],
+  standard: [
+    'Unlimited inventory',
+    'Profit tracking',
+    'Reports & CSV export'
+  ],
+  premium: [
+    'Everything in Standard',
+    'AI Business Assistant',
+    'Custom reports'
+  ]
+};
 
 export default function Profile() {
   const { user } = useAuth();
@@ -71,6 +56,7 @@ export default function Profile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
   const [formData, setFormData] = useState({
     full_name: '',
     business_name: '',
@@ -81,8 +67,32 @@ export default function Profile() {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchPlans();
     }
   }, [user]);
+
+  const fetchPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subscription_plans')
+        .select('*')
+        .order('price', { ascending: true });
+
+      if (error) throw error;
+
+      const enrichedPlans = data?.map(plan => ({
+        id: plan.id,
+        name: plan.name,
+        price: plan.price,
+        description: plan.description,
+        features: planFeatures[plan.id as keyof typeof planFeatures] || []
+      })) || [];
+
+      setSubscriptionPlans(enrichedPlans);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -152,28 +162,14 @@ export default function Profile() {
     }
   };
 
-  const handleUpgrade = async (planTier: string) => {
+  const handleUpgrade = async (planId: string) => {
     if (!user) return;
-    
-    if (planTier === 'basic') {
-      toast({
-        title: "Error",
-        description: "Cannot downgrade to free plan. Please contact admin.",
-        variant: "destructive"
-      });
-      return;
-    }
     
     setProcessing(true);
     
     try {
-      // Get plan details
-      const plan = subscriptionPlans.find(p => p.tier === planTier);
+      const plan = subscriptionPlans.find(p => p.id === planId);
       if (!plan) throw new Error('Plan not found');
-
-      // Extract numeric price (remove commas, PKR and /month)
-      const priceMatch = plan.price.replace(/,/g, '').match(/\d+/);
-      const price = priceMatch ? parseInt(priceMatch[0]) : 0;
 
       // Generate invoice number using RPC
       const { data: invoiceNumber, error: invoiceNumberError } = await supabase
@@ -190,8 +186,8 @@ export default function Profile() {
         .insert({
           invoice_number: invoiceNumber,
           user_id: user.id,
-          plan: planTier,
-          amount: price,
+          plan: planId,
+          amount: plan.price,
           status: 'UNPAID',
           due_date: dueDate.toISOString()
         })
@@ -319,7 +315,7 @@ export default function Profile() {
                 <h4 className="font-semibold">Current Plan Features:</h4>
                 <ul className="text-sm space-y-1">
                   {subscriptionPlans
-                    .find(plan => plan.tier === (profile?.subscription_tier || 'basic'))
+                    .find(plan => plan.id === (profile?.subscription_tier || 'basic'))
                     ?.features.map((feature, index) => (
                       <li key={index} className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-600" />
@@ -341,19 +337,19 @@ export default function Profile() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {subscriptionPlans.map((plan) => (
-              <Card key={plan.tier} className={`relative ${profile?.subscription_tier === plan.tier ? 'border-primary' : ''}`}>
-                {profile?.subscription_tier === plan.tier && (
+              <Card key={plan.id} className={`relative ${profile?.subscription_tier === plan.id ? 'border-primary' : ''}`}>
+                {profile?.subscription_tier === plan.id && (
                   <Badge className="absolute -top-2 left-4 bg-primary">
                     Current Plan
                   </Badge>
                 )}
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    {getPlanIcon(plan.tier)}
+                    {getPlanIcon(plan.id)}
                     {plan.name}
                   </CardTitle>
-                  <div className="text-2xl font-bold">{plan.price}</div>
-                  {plan.tier !== 'basic' && (
+                  <div className="text-2xl font-bold">{plan.price === 0 ? 'Free' : `PKR ${plan.price.toLocaleString()}/month`}</div>
+                  {plan.id !== 'basic' && (
                     <p className="text-sm text-muted-foreground">per month</p>
                   )}
                 </CardHeader>
@@ -366,14 +362,14 @@ export default function Profile() {
                       </li>
                     ))}
                   </ul>
-                  {profile?.subscription_tier !== plan.tier && (
+                  {profile?.subscription_tier !== plan.id && (
                     <Button 
-                      onClick={() => handleUpgrade(plan.tier)}
+                      onClick={() => handleUpgrade(plan.id)}
                       className="w-full"
-                      variant={plan.tier === 'premium' ? 'default' : 'outline'}
+                      variant={plan.id === 'premium' ? 'default' : 'outline'}
                       disabled={processing}
                     >
-                      {processing ? 'Processing...' : (plan.tier === 'basic' ? 'Contact Admin' : 'Upgrade')}
+                      {processing ? 'Processing...' : (plan.id === 'basic' ? 'Contact Admin' : 'Upgrade')}
                     </Button>
                   )}
                 </CardContent>
