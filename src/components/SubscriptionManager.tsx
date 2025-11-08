@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -60,6 +61,7 @@ const plans = [
 ];
 
 export default function SubscriptionManager({ currentTier, onTierChange }: SubscriptionManagerProps) {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [processing, setProcessing] = useState<string | null>(null);
@@ -125,7 +127,7 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
       });
       
       // Navigate to invoice page
-      window.location.href = `/invoice/${invoice.id}`;
+      navigate(`/invoice/${invoice.id}`);
     } catch (error: any) {
       toast({
         title: "Error",
