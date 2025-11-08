@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { mobileSchema } from '@/lib/validationSchemas';
+import BulkInventoryImport from '@/components/BulkInventoryImport';
 
 interface Mobile {
   id: string;
@@ -203,81 +204,84 @@ export default function Inventory() {
             {features.maxMobiles && ` | Limit: ${mobiles.length}/${features.maxMobiles}`}
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={handleAddClick}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Mobile
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>{editingMobile ? 'Edit Mobile' : 'Add New Mobile'}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="brand">Brand *</Label>
-                <Input
-                  id="brand"
-                  value={formData.brand}
-                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="model">Model *</Label>
-                <Input
-                  id="model"
-                  value={formData.model}
-                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="imei">IMEI</Label>
-                <Input
-                  id="imei"
-                  value={formData.imei}
-                  onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="condition">Condition</Label>
-                <Select value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="excellent">Excellent</SelectItem>
-                    <SelectItem value="good">Good</SelectItem>
-                    <SelectItem value="fair">Fair</SelectItem>
-                    <SelectItem value="poor">Poor</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="selling_price">Selling Price</Label>
-                <Input
-                  id="selling_price"
-                  type="number"
-                  value={formData.selling_price}
-                  onChange={(e) => setFormData({ ...formData, selling_price: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                {editingMobile ? 'Update Mobile' : 'Add Mobile'}
+        <div className="flex gap-2">
+          <BulkInventoryImport onImportComplete={fetchMobiles} />
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={handleAddClick}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Mobile
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>{editingMobile ? 'Edit Mobile' : 'Add New Mobile'}</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="brand">Brand *</Label>
+                  <Input
+                    id="brand"
+                    value={formData.brand}
+                    onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="model">Model *</Label>
+                  <Input
+                    id="model"
+                    value={formData.model}
+                    onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="imei">IMEI</Label>
+                  <Input
+                    id="imei"
+                    value={formData.imei}
+                    onChange={(e) => setFormData({ ...formData, imei: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="condition">Condition</Label>
+                  <Select value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="excellent">Excellent</SelectItem>
+                      <SelectItem value="good">Good</SelectItem>
+                      <SelectItem value="fair">Fair</SelectItem>
+                      <SelectItem value="poor">Poor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="selling_price">Selling Price</Label>
+                  <Input
+                    id="selling_price"
+                    type="number"
+                    value={formData.selling_price}
+                    onChange={(e) => setFormData({ ...formData, selling_price: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  />
+                </div>
+                <Button type="submit" className="w-full">
+                  {editingMobile ? 'Update Mobile' : 'Add Mobile'}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
