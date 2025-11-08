@@ -11,10 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, TrendingUp } from 'lucide-react';
+import { Plus, Edit, Trash2, TrendingUp, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saleSchema, customerSchema } from '@/lib/validationSchemas';
 import { sanitizeError } from '@/lib/errorHandling';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface Sale {
   id: string;
@@ -50,6 +51,7 @@ interface Mobile {
 export default function Sales() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { features } = useSubscription();
   const [sales, setSales] = useState<Sale[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [availableMobiles, setAvailableMobiles] = useState<Mobile[]>([]);
@@ -341,11 +343,18 @@ export default function Sales() {
             <p className="text-muted-foreground">
               Total Sales: PKR {totalSales.toLocaleString()}
             </p>
-            <p className="text-muted-foreground">
-              Total Profit: <span className={totalProfit >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-                PKR {totalProfit.toLocaleString()}
-              </span>
-            </p>
+            {features.canAccessProfitTracking ? (
+              <p className="text-muted-foreground">
+                Total Profit: <span className={totalProfit >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                  PKR {totalProfit.toLocaleString()}
+                </span>
+              </p>
+            ) : (
+              <p className="text-muted-foreground flex items-center gap-1">
+                <Crown className="h-4 w-4 text-yellow-500" />
+                Profit tracking available on Standard+
+              </p>
+            )}
             <p className="text-muted-foreground">Records: {sales.length}</p>
           </div>
         </div>
@@ -521,8 +530,8 @@ export default function Sales() {
                 <p><strong>Customer:</strong> {sale.customers.name}</p>
                 <p><strong>Date:</strong> {new Date(sale.sale_date).toLocaleDateString()}</p>
                 
-                {/* Profit calculation and display */}
-                {sale.mobiles.purchase_price !== null && (
+                {/* Profit calculation and display - only for Standard+ users */}
+                {features.canAccessProfitTracking && sale.mobiles.purchase_price !== null && (
                   <div className="pt-2 border-t">
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Sale Price:</span>
@@ -553,6 +562,16 @@ export default function Sales() {
                           <Badge variant="destructive">Loss</Badge>
                         );
                       })()}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Upgrade prompt for Free tier users */}
+                {!features.canAccessProfitTracking && (
+                  <div className="pt-2 border-t bg-muted p-2 rounded-lg">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Crown className="h-3 w-3 text-yellow-500" />
+                      <span>Upgrade to Standard or Premium to see profit tracking</span>
                     </div>
                   </div>
                 )}
