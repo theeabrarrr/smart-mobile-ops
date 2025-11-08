@@ -35,17 +35,30 @@ const planFeatures = {
   basic: [
     'Up to 20 mobiles only',
     'Basic customer management',
-    'Simple sales tracking'
+    'Simple sales tracking',
+    'Single user access',
+    'Email support'
   ],
   standard: [
     'Unlimited inventory',
-    'Profit tracking',
-    'Reports & CSV export'
+    'Unlimited customers',
+    'Bulk import (CSV/Excel)',
+    'Advanced profit tracking',
+    'Detailed reports & analytics',
+    'CSV/Excel export',
+    'Seller tracking (CNIC/Phone)',
+    'Purchase history',
+    'Priority email support'
   ],
   premium: [
     'Everything in Standard',
     'AI Business Assistant',
-    'Custom reports'
+    'Custom reports & insights',
+    'Predictive analytics',
+    'Smart recommendations',
+    'Advanced export options',
+    'Premium support (24/7)',
+    'Early access to new features'
   ]
 };
 

@@ -1,9 +1,10 @@
 // Subscription tier constants and feature definitions
 
-export type SubscriptionTier = 'free' | 'standard' | 'premium';
+export type SubscriptionTier = 'free' | 'basic' | 'standard' | 'premium';
 
 export const TIER_LEVELS = {
   free: 0,
+  basic: 0,
   standard: 1,
   premium: 2
 } as const;

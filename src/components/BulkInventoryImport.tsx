@@ -7,10 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Upload, Download, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Upload, Download, CheckCircle, XCircle, AlertCircle, Crown } from 'lucide-react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { mobileSchema } from '@/lib/validationSchemas';
+import { useSubscription } from '@/hooks/useSubscription';
+import { canAccessFeature } from '@/lib/subscriptionTiers';
+import { UpgradeDialog } from './UpgradeDialog';
 
 interface ImportRow {
   brand: string;
@@ -29,8 +32,10 @@ interface BulkInventoryImportProps {
 
 export default function BulkInventoryImport({ onImportComplete }: BulkInventoryImportProps) {
   const { user } = useAuth();
+  const { tier } = useSubscription();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ImportRow[]>([]);
   const [importing, setImporting] = useState(false);
@@ -197,14 +202,23 @@ export default function BulkInventoryImport({ onImportComplete }: BulkInventoryI
   const validCount = parsedData.filter(row => row.valid).length;
   const invalidCount = parsedData.filter(row => !row.valid).length;
 
+  const handleOpenDialog = () => {
+    if (!canAccessFeature(tier, 'bulk_purchase')) {
+      setShowUpgradeDialog(true);
+      return;
+    }
+    setIsOpen(true);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">
-          <Upload className="h-4 w-4 mr-2" />
-          Bulk Import
-        </Button>
-      </DialogTrigger>
+    <>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" onClick={handleOpenDialog}>
+            <Upload className="h-4 w-4 mr-2" />
+            Bulk Import
+          </Button>
+        </DialogTrigger>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Bulk Import Inventory</DialogTitle>
@@ -330,6 +344,14 @@ export default function BulkInventoryImport({ onImportComplete }: BulkInventoryI
           )}
         </div>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        title="Premium Feature"
+        message="Bulk import is available for Standard and Premium subscribers. Upgrade to import multiple mobiles at once using CSV or Excel files."
+      />
+    </>
   );
 }
