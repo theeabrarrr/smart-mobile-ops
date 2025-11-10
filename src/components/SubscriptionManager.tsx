@@ -170,54 +170,82 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold">Choose Your Plan</h2>
-        <p className="text-muted-foreground mt-2">Upgrade your mobile business management experience</p>
+    <div className="space-y-8 py-8">
+      <div className="text-center space-y-3">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground">Simple, Transparent Pricing</h2>
+        <p className="text-lg text-muted-foreground">Choose the plan that fits your needs. Upgrade, downgrade, or cancel anytime.</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {plans.map((plan) => {
           const Icon = plan.icon;
           const isCurrentPlan = currentTier === plan.id;
           const isUpgrade = plans.findIndex(p => p.id === currentTier) < plans.findIndex(p => p.id === plan.id);
+          const isMostPopular = plan.id === 'standard';
           
           return (
-            <Card key={plan.id} className={`relative ${isCurrentPlan ? 'ring-2 ring-primary' : ''}`}>
-              {isCurrentPlan && (
-                <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary">
-                  Current Plan
-                </Badge>
+            <Card 
+              key={plan.id} 
+              className={`relative transition-all ${
+                isCurrentPlan 
+                  ? 'border-primary shadow-lg' 
+                  : isMostPopular 
+                    ? 'border-primary border-2 shadow-xl md:scale-105' 
+                    : 'border-border hover:border-primary/50 hover:shadow-md'
+              }`}
+            >
+              {isMostPopular && !isCurrentPlan && (
+                <div className="absolute -top-3 left-0 right-0 flex justify-center z-10">
+                  <Badge className="bg-orange-500 hover:bg-orange-500 text-white px-4 py-1 text-xs font-semibold">
+                    Most Popular
+                  </Badge>
+                </div>
               )}
               
-              <CardHeader className="text-center">
-                <div className={`w-12 h-12 ${plan.color} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                  <Icon className="h-6 w-6 text-white" />
+              {isCurrentPlan && (
+                <div className="absolute -top-3 left-0 right-0 flex justify-center z-10">
+                  <Badge className="bg-primary hover:bg-primary text-primary-foreground px-4 py-1 text-xs font-semibold">
+                    Current Plan
+                  </Badge>
                 </div>
-                <CardTitle>{plan.name}</CardTitle>
-                <CardDescription className="text-2xl font-bold">
-                  {plan.price === 0 ? 'Free' : `PKR ${plan.price.toLocaleString()}/month`}
+              )}
+              
+              <CardHeader className="text-center pb-8 pt-8">
+                <CardTitle className="text-xl font-bold text-foreground mb-2">
+                  {plan.name}
+                </CardTitle>
+                <CardDescription className="text-sm text-muted-foreground mb-4">
+                  {plan.id === 'basic' && 'Perfect for trying out MobileSales Pro'}
+                  {plan.id === 'standard' && 'For professionals who track profits'}
+                  {plan.id === 'premium' && 'For teams that need to collaborate'}
                 </CardDescription>
+                <div className="mt-4">
+                  <span className="text-4xl md:text-5xl font-bold text-foreground">
+                    {plan.price === 0 ? 'PKR 0' : `PKR ${plan.price.toLocaleString()}`}
+                  </span>
+                  <span className="text-muted-foreground text-sm ml-1">/month</span>
+                </div>
               </CardHeader>
               
-              <CardContent className="space-y-4">
-                <ul className="space-y-2">
+              <CardContent className="space-y-6">
+                <ul className="space-y-3 min-h-[240px]">
                   {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span className="text-sm">{feature}</span>
+                    <li key={index} className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-foreground">{feature}</span>
                     </li>
                   ))}
                 </ul>
                 
                 {!isCurrentPlan && (
                   <Button 
-                    className="w-full"
+                    className={`w-full ${isMostPopular ? 'bg-primary hover:bg-primary/90' : ''}`}
                     onClick={() => handleUpgrade(plan.id)}
                     disabled={!!processing}
-                    variant={isUpgrade ? "default" : "outline"}
+                    variant={isUpgrade && isMostPopular ? "default" : isUpgrade ? "default" : "outline"}
                   >
                     {processing === plan.id ? 'Processing...' : 
+                     plan.id === 'basic' ? 'Get Started' :
                      isUpgrade ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`}
                   </Button>
                 )}
