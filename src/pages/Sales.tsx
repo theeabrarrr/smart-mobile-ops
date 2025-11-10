@@ -360,7 +360,7 @@ export default function Sales() {
 
   return (
     <div className="p-6 space-y-6">
-      {isReadOnly && (
+      {isReadOnly() && (
         <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
           <Eye className="h-4 w-4" />
           <AlertDescription>
