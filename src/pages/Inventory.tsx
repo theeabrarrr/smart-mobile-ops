@@ -419,8 +419,8 @@ export default function Inventory() {
               Upgrade Required
             </AlertDialogTitle>
             <AlertDialogDescription>
-              You've reached the limit of {features.maxMobiles} mobiles on the Free plan. 
-              Upgrade to Standard or Premium to add unlimited mobiles and access more features like profit tracking, seller info, and reports!
+              You've reached the limit of {features.maxMobiles} mobiles on the Starter Kit. 
+              Upgrade to Dealer Pack or Empire Plan to add more mobiles and access more features like profit tracking, multi-user roles, and reports!
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

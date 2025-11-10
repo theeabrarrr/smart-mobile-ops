@@ -349,8 +349,8 @@ export default function BulkInventoryImport({ onImportComplete }: BulkInventoryI
       <UpgradeDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
-        title="Premium Feature"
-        message="Bulk import is available for Standard and Premium subscribers. Upgrade to import multiple mobiles at once using CSV or Excel files."
+        title="Dealer Pack Feature"
+        message="Bulk import is available for Dealer Pack and Empire Plan subscribers. Upgrade to import multiple mobiles at once using CSV or Excel files."
       />
     </>
   );

@@ -385,7 +385,7 @@ export default function Sales() {
             ) : (
               <p className="text-muted-foreground flex items-center gap-1">
                 <Crown className="h-4 w-4 text-yellow-500" />
-                Profit tracking available on Standard+
+                Profit tracking available on Dealer Pack+
               </p>
             )}
             <p className="text-muted-foreground">Records: {sales.length}</p>
@@ -565,7 +565,7 @@ export default function Sales() {
                 <p><strong>Customer:</strong> {sale.customers.name}</p>
                 <p><strong>Date:</strong> {new Date(sale.sale_date).toLocaleDateString()}</p>
                 
-                {/* Profit calculation and display - only for Standard+ users */}
+                {/* Profit calculation and display - only for Dealer Pack+ users */}
                 {features.canAccessProfitTracking && sale.mobiles.purchase_price !== null && (
                   <div className="pt-2 border-t">
                     <div className="flex justify-between text-xs">
@@ -606,7 +606,7 @@ export default function Sales() {
                   <div className="pt-2 border-t bg-muted p-2 rounded-lg">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Crown className="h-3 w-3 text-yellow-500" />
-                      <span>Upgrade to Standard or Premium to see profit tracking</span>
+                      <span>Upgrade to Dealer Pack or Empire Plan to see profit tracking</span>
                     </div>
                   </div>
                 )}

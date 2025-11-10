@@ -23,28 +23,26 @@ interface SubscriptionPlan {
 }
 
 const planFeatures = {
-  basic: [
-    'Up to 20 mobiles only',
-    'Basic customer management',
-    'Simple sales tracking',
+  starter_kit: [
+    'Basic sales, purchase & inventory management',
+    'Limit: 50 mobiles/month',
     'Single user access',
-    'Email support'
+    'Simple dashboard',
+    'Ideal for small mobile sellers'
   ],
-  standard: [
-    'Unlimited inventory',
-    'Unlimited customers',
-    'Bulk import (CSV/Excel)',
-    'Advanced profit tracking',
-    'Detailed reports & analytics',
-    'CSV/Excel export',
-    'Seller tracking (CNIC/Phone)',
-    'Purchase history',
-    'Priority email support'
+  dealer_pack: [
+    'All Starter Kit features',
+    'Limit: 200 mobiles/month',
+    'Expense tracker',
+    'Customer history',
+    'Multi-user roles (Admin, Staff, Viewer)',
+    'Monthly profit-loss summary',
+    'Smart notifications for due payments or low stock'
   ],
   empire_plan: [
     'Unlimited mobiles',
     'Everything in Dealer Pack',
-    'Advanced analytics & charts',
+    'Advanced analytics & visual reports',
     'Stock alerts (low inventory)',
     'Custom report exports (CSV/PDF)',
     'Multi-branch support (coming soon)',

@@ -338,7 +338,7 @@ export default function Purchases() {
                 <>
                   <div>
                     <Label htmlFor="seller_cnic">
-                      Seller CNIC <Badge variant="outline" className="ml-2">Standard+</Badge>
+                      Seller CNIC <Badge variant="outline" className="ml-2">Dealer Pack+</Badge>
                     </Label>
                     <Input
                       id="seller_cnic"
@@ -349,7 +349,7 @@ export default function Purchases() {
                   </div>
                   <div>
                     <Label htmlFor="seller_phone">
-                      Seller Phone <Badge variant="outline" className="ml-2">Standard+</Badge>
+                      Seller Phone <Badge variant="outline" className="ml-2">Dealer Pack+</Badge>
                     </Label>
                     <Input
                       id="seller_phone"

@@ -156,7 +156,7 @@ export default function AIAssistant() {
           <p className="text-muted-foreground mt-1">
             {hasAccess 
               ? "Get AI-powered insights in English and Roman Urdu for your mobile business"
-              : "AI Assistant is available for Premium plan users only"
+              : "AI Assistant is available for Empire Plan users only"
             }
           </p>
         </div>
@@ -308,7 +308,7 @@ export default function AIAssistant() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={hasAccess 
                   ? "Ask in English or Roman Urdu about your business..." 
-                  : "Upgrade to Premium to use AI Assistant..."
+                  : "Upgrade to Empire Plan to use AI Assistant..."
                 }
                 disabled={loading || !hasAccess}
                 className="flex-1"

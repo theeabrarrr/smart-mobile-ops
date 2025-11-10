@@ -248,7 +248,7 @@ const Dashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Profit <Badge variant="outline" className="ml-2">Standard+</Badge>
+                Total Profit <Badge variant="outline" className="ml-2">Dealer Pack+</Badge>
               </CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -325,7 +325,7 @@ const Dashboard = () => {
                 <div className="text-sm text-purple-600">✓ Custom Reports</div>
               </>
             ) : (
-              <div className="text-sm text-muted-foreground">✗ Premium features (AI, Bulk, Custom Reports)</div>
+              <div className="text-sm text-muted-foreground">✗ Empire Plan features (AI, Bulk, Custom Reports)</div>
             )}
           </CardContent>
         </Card>

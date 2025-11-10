@@ -220,7 +220,7 @@ Best regards`;
           <CardDescription>
             Export your data or contact support
             {hasExportAccess && (
-              <Badge variant="outline" className="ml-2">Standard+</Badge>
+              <Badge variant="outline" className="ml-2">Dealer Pack+</Badge>
             )}
           </CardDescription>
         </CardHeader>
@@ -270,7 +270,7 @@ Best regards`;
                 <li>Full business reports and analytics</li>
               </ul>
               <p className="mt-2 text-xs">
-                Currently on Free plan. <a href="/profile" className="text-primary hover:underline">View upgrade options →</a>
+                Currently on Starter Kit. <a href="/profile" className="text-primary hover:underline">View upgrade options →</a>
               </p>
             </div>
           )}

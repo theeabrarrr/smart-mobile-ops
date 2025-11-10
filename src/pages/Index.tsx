@@ -393,7 +393,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Add multiple mobile devices at once with CSV import (Premium only)
+                  Add multiple mobile devices at once with CSV import (Dealer Pack+)
                 </p>
               </CardContent>
             </Card>
@@ -406,7 +406,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Ask questions in Roman Urdu or English about your business data (Premium)
+                  Ask questions in Roman Urdu or English about your business data (Empire Plan)
                 </p>
               </CardContent>
             </Card>
@@ -460,7 +460,7 @@ const Index = () => {
             <div className="space-y-6">
               <Badge variant="secondary" className="mb-2">
                 <Sparkles className="h-3 w-3 mr-1" />
-                Premium Feature
+                Empire Plan Feature
               </Badge>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground">
                 AI Business Assistant

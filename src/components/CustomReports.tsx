@@ -27,13 +27,13 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState<any>(null);
 
-  const canUseCustomReports = userSubscriptionTier === 'premium';
+  const canUseCustomReports = userSubscriptionTier === 'empire_plan';
 
   const generateReport = async () => {
     if (!canUseCustomReports) {
       toast({
-        title: "Premium Feature",
-        description: "Custom reports are available for Premium plan users only.",
+        title: "Empire Plan Feature",
+        description: "Custom reports are available for Empire Plan users only.",
         variant: "destructive"
       });
       return;
@@ -347,7 +347,7 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
             <FileText className="h-5 w-5" />
             Custom Reports
             {canUseCustomReports && (
-              <Badge variant="secondary">Premium</Badge>
+              <Badge variant="secondary">Empire Plan</Badge>
             )}
           </CardTitle>
         </CardHeader>
@@ -355,7 +355,7 @@ export default function CustomReports({ userSubscriptionTier }: CustomReportsPro
           {!canUseCustomReports && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
-                🔒 Custom reports are available for Premium plan users only.
+                🔒 Custom reports are available for Empire Plan users only.
               </p>
             </div>
           )}

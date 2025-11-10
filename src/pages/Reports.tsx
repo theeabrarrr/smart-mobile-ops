@@ -185,10 +185,10 @@ export default function Reports() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Crown className="h-5 w-5 text-yellow-500" />
-              Upgrade to Standard or Premium
+              Upgrade to Dealer Pack or Empire Plan
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Reports and analytics are available on Standard and Premium plans. Upgrade now to access detailed business insights, profit tracking, and data export features!
+              Reports and analytics are available on Dealer Pack and Empire Plan. Upgrade now to access detailed business insights, profit tracking, and data export features!
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -209,7 +209,7 @@ export default function Reports() {
       <div className="flex items-center gap-2 mb-6">
         <BarChart3 className="h-8 w-8 text-primary" />
         <h1 className="text-3xl font-bold text-foreground">
-          Reports & Analytics <Badge variant="outline" className="ml-2">Standard+</Badge>
+          Reports & Analytics <Badge variant="outline" className="ml-2">Dealer Pack+</Badge>
         </h1>
       </div>
 
