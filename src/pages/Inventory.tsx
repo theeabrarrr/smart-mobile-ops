@@ -10,13 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Edit, Trash2, Smartphone, Crown, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Smartphone, Crown, Eye, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useRoleCheck } from '@/hooks/useRoleCheck';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { mobileSchema } from '@/lib/validationSchemas';
 import BulkInventoryImport from '@/components/BulkInventoryImport';
+import { LowStockIndicator } from '@/components/LowStockIndicator';
 
 interface Mobile {
   id: string;
@@ -40,6 +41,7 @@ export default function Inventory() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
   const [editingMobile, setEditingMobile] = useState<Mobile | null>(null);
+  const [checkingLowStock, setCheckingLowStock] = useState(false);
   const [formData, setFormData] = useState({
     brand: '',
     model: '',
@@ -231,6 +233,37 @@ export default function Inventory() {
     setEditingMobile(null);
   };
 
+  const checkLowStock = async () => {
+    if (tier !== 'empire_plan') {
+      toast({
+        title: "Empire Plan Feature",
+        description: "Low stock alerts are available for Empire Plan users only.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCheckingLowStock(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-low-stock');
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Low Stock Check Complete",
+        description: data.message || "Low stock check completed successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to check low stock",
+        variant: "destructive"
+      });
+    } finally {
+      setCheckingLowStock(false);
+    }
+  };
+
   const openEditDialog = (mobile: Mobile) => {
     setEditingMobile(mobile);
     setFormData({
@@ -248,6 +281,14 @@ export default function Inventory() {
 
   const availableMobiles = mobiles.filter(mobile => !mobile.is_sold);
   const soldMobiles = mobiles.filter(mobile => mobile.is_sold);
+
+  // Calculate stock levels by brand/model for low stock indicators
+  const getStockInfo = (brand: string, model: string) => {
+    const modelMobiles = mobiles.filter(m => m.brand === brand && m.model === model);
+    const totalCount = modelMobiles.length;
+    const availableCount = modelMobiles.filter(m => !m.is_sold).length;
+    return { availableCount, totalCount };
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -269,6 +310,16 @@ export default function Inventory() {
           </p>
         </div>
         <div className="flex gap-2">
+          {tier === 'empire_plan' && (
+            <Button 
+              variant="outline" 
+              onClick={checkLowStock}
+              disabled={checkingLowStock}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${checkingLowStock ? 'animate-spin' : ''}`} />
+              Check Low Stock
+            </Button>
+          )}
           <BulkInventoryImport onImportComplete={fetchMobiles} />
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -379,13 +430,21 @@ export default function Inventory() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center">
-                  <Badge variant={mobile.is_sold ? 'destructive' : 'default'}>
-                    {mobile.is_sold ? 'Sold' : 'Available'}
-                  </Badge>
-                  <Badge variant="outline">
-                    {mobile.condition}
-                  </Badge>
+                <div className="flex justify-between items-center flex-wrap gap-2">
+                  <div className="flex gap-2">
+                    <Badge variant={mobile.is_sold ? 'destructive' : 'default'}>
+                      {mobile.is_sold ? 'Sold' : 'Available'}
+                    </Badge>
+                    <Badge variant="outline">
+                      {mobile.condition}
+                    </Badge>
+                  </div>
+                  {tier === 'empire_plan' && !mobile.is_sold && (
+                    <LowStockIndicator 
+                      availableCount={getStockInfo(mobile.brand, mobile.model).availableCount}
+                      totalCount={getStockInfo(mobile.brand, mobile.model).totalCount}
+                    />
+                  )}
                 </div>
                 {mobile.imei && (
                   <p><strong>IMEI:</strong> {mobile.imei}</p>
