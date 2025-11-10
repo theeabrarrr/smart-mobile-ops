@@ -29,6 +29,7 @@ import {
   Receipt
 } from 'lucide-react';
 import { useAdminRole } from '@/hooks/useAdminRole';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Profile } from '@/types/profile';
 
 export const AppSidebar = () => {
@@ -37,6 +38,7 @@ export const AppSidebar = () => {
   const location = useLocation();
   const [profile, setProfile] = useState<Profile | null>(null);
   const { isAdmin } = useAdminRole();
+  const { role } = useUserRole();
 
   useEffect(() => {
     if (user) {
@@ -127,6 +129,11 @@ export const AppSidebar = () => {
       path: '/admin/users'
     },
     {
+      title: 'Role Management',
+      icon: Shield,
+      path: '/admin/roles'
+    },
+    {
       title: 'Subscriptions',
       icon: Crown,
       path: '/admin/subscriptions'
@@ -157,6 +164,15 @@ export const AppSidebar = () => {
     }
   };
 
+  const getRoleBadgeColor = (userRole: string) => {
+    switch (userRole) {
+      case 'admin': return 'bg-red-500 text-white';
+      case 'staff': return 'bg-blue-500 text-white';
+      case 'viewer': return 'bg-green-500 text-white';
+      default: return 'bg-gray-500 text-white';
+    }
+  };
+
   const canAccessFeature = (requiredTier: string) => {
     if (!profile) return requiredTier === 'starter_kit';
     
@@ -174,11 +190,18 @@ export const AppSidebar = () => {
           <Smartphone className="h-8 w-8 text-sidebar-primary" />
           <div className="group-data-[collapsible=icon]:hidden">
             <h2 className="text-lg font-semibold text-sidebar-foreground">MobileSales Pro</h2>
-            <Badge 
-              className={`${getTierColor(profile?.subscription_tier || 'starter_kit')} text-white text-xs`}
-            >
-              {profile?.subscription_tier ? profile.subscription_tier.toUpperCase().replace('_', ' ') : 'STARTER KIT'}
-            </Badge>
+            <div className="flex gap-2 flex-wrap">
+              <Badge 
+                className={`${getTierColor(profile?.subscription_tier || 'starter_kit')} text-white text-xs`}
+              >
+                {profile?.subscription_tier ? profile.subscription_tier.toUpperCase().replace('_', ' ') : 'STARTER KIT'}
+              </Badge>
+              {role && role !== 'user' && (
+                <Badge className={`${getRoleBadgeColor(role)} text-xs`}>
+                  {role.toUpperCase()}
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
       </SidebarHeader>

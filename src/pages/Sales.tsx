@@ -11,11 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, TrendingUp, Crown } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Plus, Edit, Trash2, TrendingUp, Crown, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saleSchema, customerSchema } from '@/lib/validationSchemas';
 import { sanitizeError } from '@/lib/errorHandling';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useRoleCheck } from '@/hooks/useRoleCheck';
 
 interface Sale {
   id: string;
@@ -52,6 +54,7 @@ export default function Sales() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { features } = useSubscription();
+  const { isReadOnly, role } = useRoleCheck();
   const [sales, setSales] = useState<Sale[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [availableMobiles, setAvailableMobiles] = useState<Mobile[]>([]);
@@ -357,6 +360,15 @@ export default function Sales() {
 
   return (
     <div className="p-6 space-y-6">
+      {isReadOnly && (
+        <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+          <Eye className="h-4 w-4" />
+          <AlertDescription>
+            You are viewing in read-only mode as a <strong className="uppercase">{role}</strong>. Contact an admin to create or edit records.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Sales</h1>
@@ -381,7 +393,7 @@ export default function Sales() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm}>
+            <Button onClick={resetForm} disabled={isReadOnly()}>
               <Plus className="h-4 w-4 mr-2" />
               Record Sale
             </Button>
@@ -532,6 +544,7 @@ export default function Sales() {
                     variant="outline"
                     size="sm"
                     onClick={() => openEditDialog(sale)}
+                    disabled={isReadOnly()}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -539,6 +552,7 @@ export default function Sales() {
                     variant="destructive"
                     size="sm"
                     onClick={() => handleDelete(sale.id, sale.mobile_id)}
+                    disabled={isReadOnly()}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

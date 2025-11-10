@@ -20,8 +20,10 @@ import Profile from "./pages/Profile";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import NotFound from "./pages/NotFound";
 import { AdminRoute } from "./components/AdminRoute";
+import { RoleBasedRoute } from "./components/RoleBasedRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersManagement from "./pages/admin/UsersManagement";
+import RoleManagement from "./pages/admin/RoleManagement";
 import SubscriptionManager from "./pages/admin/SubscriptionManager";
 import InvoiceManagement from "./pages/admin/InvoiceManagement";
 import SystemLogs from "./pages/admin/SystemLogs";
@@ -108,6 +110,13 @@ const App = () => (
               <AdminRoute>
                 <DashboardLayout>
                   <UsersManagement />
+                </DashboardLayout>
+              </AdminRoute>
+            } />
+            <Route path="/admin/roles" element={
+              <AdminRoute>
+                <DashboardLayout>
+                  <RoleManagement />
                 </DashboardLayout>
               </AdminRoute>
             } />

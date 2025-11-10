@@ -9,9 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Smartphone, Crown } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Plus, Edit, Trash2, Smartphone, Crown, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useRoleCheck } from '@/hooks/useRoleCheck';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { mobileSchema } from '@/lib/validationSchemas';
 import BulkInventoryImport from '@/components/BulkInventoryImport';
@@ -32,6 +34,7 @@ export default function Inventory() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { tier, features } = useSubscription();
+  const { isReadOnly, role } = useRoleCheck();
   const [mobiles, setMobiles] = useState<Mobile[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -248,6 +251,15 @@ export default function Inventory() {
 
   return (
     <div className="p-6 space-y-6">
+      {isReadOnly() && (
+        <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+          <Eye className="h-4 w-4" />
+          <AlertDescription>
+            You are viewing in read-only mode as a <strong className="uppercase">{role}</strong>. Contact an admin to create or edit records.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Mobile Inventory</h1>
@@ -260,7 +272,7 @@ export default function Inventory() {
           <BulkInventoryImport onImportComplete={fetchMobiles} />
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={handleAddClick}>
+              <Button onClick={handleAddClick} disabled={isReadOnly()}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Mobile
               </Button>
@@ -350,7 +362,7 @@ export default function Inventory() {
                     variant="outline"
                     size="sm"
                     onClick={() => openEditDialog(mobile)}
-                    disabled={mobile.is_sold}
+                    disabled={mobile.is_sold || isReadOnly()}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -358,6 +370,7 @@ export default function Inventory() {
                     variant="destructive"
                     size="sm"
                     onClick={() => handleDelete(mobile.id)}
+                    disabled={isReadOnly()}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
