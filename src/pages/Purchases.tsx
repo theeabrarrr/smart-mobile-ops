@@ -240,11 +240,11 @@ export default function Purchases() {
   const totalPurchases = purchases.reduce((sum, purchase) => sum + purchase.purchase_price, 0);
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Purchases</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Purchases</h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-1">
             Total Spent: PKR {totalPurchases.toLocaleString()} | Records: {purchases.length}
           </p>
         </div>
@@ -375,8 +375,8 @@ export default function Purchases() {
           </DialogContent>
         </Dialog>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {purchases.map((purchase) => (
           <Card key={purchase.id}>
             <CardHeader>

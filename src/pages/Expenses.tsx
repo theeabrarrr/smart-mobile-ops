@@ -120,8 +120,8 @@ export default function Expenses() {
   if (!features.canAccessExpenseTracker) {
     return (
       <DashboardLayout>
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
+        <div className="space-y-4 md:space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold">Expense Tracker</h1>
               <p className="text-muted-foreground mt-1">Track your business expenses</p>
@@ -153,8 +153,8 @@ export default function Expenses() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold">Expense Tracker</h1>
             <p className="text-muted-foreground mt-1">Manage your business expenses</p>
@@ -218,17 +218,17 @@ export default function Expenses() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Total Expenses: PKR {totalExpenses.toLocaleString()}</CardTitle>
+            <CardTitle className="text-lg md:text-xl">Total Expenses: PKR {totalExpenses.toLocaleString()}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="min-w-[100px]">Date</TableHead>
+                  <TableHead className="min-w-[100px]">Category</TableHead>
+                  <TableHead className="hidden md:table-cell">Description</TableHead>
+                  <TableHead className="text-right min-w-[100px]">Amount</TableHead>
+                  <TableHead className="text-right min-w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -241,10 +241,10 @@ export default function Expenses() {
                 ) : (
                   expenses.map((expense) => (
                     <TableRow key={expense.id}>
-                      <TableCell>{format(new Date(expense.expense_date), 'PP')}</TableCell>
-                      <TableCell>{expense.category}</TableCell>
-                      <TableCell>{expense.description || '-'}</TableCell>
-                      <TableCell className="text-right">PKR {Number(expense.amount).toLocaleString()}</TableCell>
+                      <TableCell className="text-sm">{format(new Date(expense.expense_date), 'PP')}</TableCell>
+                      <TableCell className="text-sm">{expense.category}</TableCell>
+                      <TableCell className="hidden md:table-cell text-sm">{expense.description || '-'}</TableCell>
+                      <TableCell className="text-right text-sm font-medium">PKR {Number(expense.amount).toLocaleString()}</TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"

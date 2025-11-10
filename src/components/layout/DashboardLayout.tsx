@@ -74,10 +74,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <ThemeToggle />
             </div>
           </header>
-          <main className="flex-1 overflow-auto p-4">
-            <PendingPaymentBanner />
-            <ExpiryWarningBanner />
-            {children}
+          <main className="flex-1 overflow-auto p-4 md:p-6">
+            <div className="max-w-7xl mx-auto space-y-4">
+              <PendingPaymentBanner />
+              <ExpiryWarningBanner />
+              {children}
+            </div>
           </main>
         </SidebarInset>
       </div>

@@ -144,9 +144,9 @@ export default function AIAssistant() {
   const hasAccess = canAccessFeature(tier, 'advanced_analytics');
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+    <div className="space-y-4 md:space-y-6 max-w-6xl mx-auto">
+        <div className="mb-4 md:mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
             <Bot className="h-8 w-8" />
             AI Business Assistant
             {hasAccess && (

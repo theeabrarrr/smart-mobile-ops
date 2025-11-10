@@ -237,13 +237,13 @@ export default function Profile() {
   if (loading) return <div className="p-6">Loading profile...</div>;
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-2 mb-6">
-        <User className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold text-foreground">Profile & Subscription</h1>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex items-center gap-2 mb-4 md:mb-6">
+        <User className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Profile & Subscription</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Profile Information */}
         <Card>
           <CardHeader>

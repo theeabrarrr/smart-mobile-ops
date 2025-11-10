@@ -359,7 +359,7 @@ export default function Sales() {
   const totalProfit = totalSales - totalPurchaseCost;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {isReadOnly() && (
         <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
           <Eye className="h-4 w-4" />
@@ -369,10 +369,10 @@ export default function Sales() {
         </Alert>
       )}
       
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Sales</h1>
-          <div className="flex gap-4 mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Sales</h1>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-1">
             <p className="text-muted-foreground">
               Total Sales: PKR {totalSales.toLocaleString()}
             </p>
@@ -529,8 +529,8 @@ export default function Sales() {
           </DialogContent>
         </Dialog>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {sales.map((sale) => (
           <Card key={sale.id}>
             <CardHeader>

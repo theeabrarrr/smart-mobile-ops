@@ -291,7 +291,7 @@ export default function Inventory() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {isReadOnly() && (
         <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
           <Eye className="h-4 w-4" />
@@ -301,15 +301,15 @@ export default function Inventory() {
         </Alert>
       )}
       
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Mobile Inventory</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Mobile Inventory</h1>
           <p className="text-muted-foreground mt-1">
             Available: {availableMobiles.length} | Sold: {soldMobiles.length}
             {features.maxMobiles && ` | Limit: ${mobiles.length}/${features.maxMobiles}`}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {tier === 'empire_plan' && (
             <Button 
               variant="outline" 
@@ -398,8 +398,8 @@ export default function Inventory() {
           </Dialog>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {mobiles.map((mobile) => (
           <Card key={mobile.id} className={mobile.is_sold ? 'opacity-60' : ''}>
             <CardHeader>

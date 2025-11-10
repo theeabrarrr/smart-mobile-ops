@@ -205,10 +205,10 @@ export default function Reports() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-2 mb-6">
-        <BarChart3 className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold text-foreground">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex items-center gap-2 mb-4 md:mb-6">
+        <BarChart3 className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">
           Reports & Analytics <Badge variant="outline" className="ml-2">Dealer Pack+</Badge>
         </h1>
       </div>
