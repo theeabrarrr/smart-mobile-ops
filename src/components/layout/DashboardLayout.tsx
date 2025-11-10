@@ -9,6 +9,7 @@ import { useLocation } from 'react-router-dom';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { ExpiryWarningBanner } from '@/components/ExpiryWarningBanner';
 import { PendingPaymentBanner } from '@/components/PendingPaymentBanner';
+import { NotificationBell } from '@/components/NotificationBell';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -68,7 +69,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
-            <div className="px-4">
+            <div className="flex items-center gap-2 px-4">
+              <NotificationBell />
               <ThemeToggle />
             </div>
           </header>

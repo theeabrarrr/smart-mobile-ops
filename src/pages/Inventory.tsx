@@ -49,8 +49,60 @@ export default function Inventory() {
   useEffect(() => {
     if (user) {
       fetchMobiles();
+      setupRealtimeSubscription();
     }
   }, [user]);
+
+  const setupRealtimeSubscription = () => {
+    const channel = supabase
+      .channel('mobiles-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'mobiles',
+          filter: `user_id=eq.${user?.id}`
+        },
+        (payload) => {
+          console.log('New mobile added:', payload.new);
+          setMobiles(prev => [payload.new as Mobile, ...prev]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'mobiles',
+          filter: `user_id=eq.${user?.id}`
+        },
+        (payload) => {
+          console.log('Mobile updated:', payload.new);
+          setMobiles(prev =>
+            prev.map(m => m.id === payload.new.id ? payload.new as Mobile : m)
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'mobiles',
+          filter: `user_id=eq.${user?.id}`
+        },
+        (payload) => {
+          console.log('Mobile deleted:', payload.old);
+          setMobiles(prev => prev.filter(m => m.id !== payload.old.id));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
 
   const fetchMobiles = async () => {
     try {

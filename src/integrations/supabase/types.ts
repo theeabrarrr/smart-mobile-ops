@@ -143,6 +143,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -386,6 +419,13 @@ export type Database = {
         }[]
       }
       get_user_mobile_count: { Args: { _user_id: string }; Returns: number }
+      get_users_with_low_stock: {
+        Args: never
+        Returns: {
+          available_count: number
+          user_id: string
+        }[]
+      }
       handle_subscription_expiry: {
         Args: never
         Returns: {

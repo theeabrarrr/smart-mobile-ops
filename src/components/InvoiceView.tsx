@@ -8,7 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Upload, Building2, User, Calendar, Banknote, CreditCard } from 'lucide-react';
+import { Upload, Building2, User, Calendar, Banknote, CreditCard, Download } from 'lucide-react';
+import { generateInvoicePDF } from '@/lib/pdfGenerator';
 
 interface Invoice {
   id: string;
@@ -119,7 +120,17 @@ export const InvoiceView = ({ invoice, userProfile, onUpdate }: InvoiceViewProps
             <CardTitle className="text-3xl font-bold">Invoice</CardTitle>
             <p className="text-muted-foreground mt-1">{invoice.invoice_number}</p>
           </div>
-          {getStatusBadge()}
+          <div className="flex gap-2 items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => generateInvoicePDF(invoice, userProfile)}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download PDF
+            </Button>
+            {getStatusBadge()}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
