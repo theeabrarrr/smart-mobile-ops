@@ -203,7 +203,7 @@ export default function BulkInventoryImport({ onImportComplete }: BulkInventoryI
   const invalidCount = parsedData.filter(row => !row.valid).length;
 
   const handleOpenDialog = () => {
-    if (!canAccessFeature(tier, 'bulk_purchase')) {
+    if (!canAccessFeature(tier, 'custom_reports')) {
       setShowUpgradeDialog(true);
       return;
     }

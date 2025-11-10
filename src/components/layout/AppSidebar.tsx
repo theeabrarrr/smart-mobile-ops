@@ -49,12 +49,12 @@ export const AppSidebar = () => {
     
     const { data } = await supabase
       .from('profiles')
-      .select('subscription_tier')
+      .select('*')
       .eq('user_id', user.id)
       .single();
 
     if (data) {
-      setProfile(data);
+      setProfile(data as Profile);
     }
   };
 
@@ -63,49 +63,55 @@ export const AppSidebar = () => {
       title: 'Dashboard',
       icon: LayoutDashboard,
       path: '/dashboard',
-      tier: 'basic'
+      tier: 'starter_kit'
     },
     {
       title: 'Customers',
       icon: Users,
       path: '/customers',
-      tier: 'basic'
+      tier: 'starter_kit'
     },
     {
       title: 'Mobile Inventory',
       icon: Smartphone,
       path: '/inventory',
-      tier: 'basic'
+      tier: 'starter_kit'
     },
     {
       title: 'Sales',
       icon: ShoppingCart,
       path: '/sales',
-      tier: 'basic'
+      tier: 'starter_kit'
     },
     {
       title: 'Purchases',
       icon: FileText,
       path: '/purchases',
-      tier: 'basic'
+      tier: 'starter_kit'
+    },
+    {
+      title: 'Expenses',
+      icon: FileText,
+      path: '/expenses',
+      tier: 'dealer_pack'
     },
     {
       title: 'Reports',
       icon: BarChart3,
       path: '/reports',
-      tier: 'standard'
+      tier: 'dealer_pack'
     },
     {
       title: 'AI Assistant',
       icon: Bot,
       path: '/ai-assistant',
-      tier: 'premium'
+      tier: 'empire_plan'
     },
     {
       title: 'My Invoices',
       icon: Receipt,
       path: '/invoices',
-      tier: 'basic'
+      tier: 'starter_kit'
     }
   ];
 
@@ -144,18 +150,18 @@ export const AppSidebar = () => {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'basic': return 'bg-blue-500';
-      case 'standard': return 'bg-green-500';
-      case 'premium': return 'bg-purple-500';
+      case 'starter_kit': return 'bg-blue-500';
+      case 'dealer_pack': return 'bg-green-500';
+      case 'empire_plan': return 'bg-purple-500';
       default: return 'bg-gray-500';
     }
   };
 
   const canAccessFeature = (requiredTier: string) => {
-    if (!profile) return requiredTier === 'basic';
+    if (!profile) return requiredTier === 'starter_kit';
     
-    const tierLevels = { basic: 1, standard: 2, premium: 3 };
-    const userLevel = tierLevels[profile.subscription_tier];
+    const tierLevels = { starter_kit: 1, dealer_pack: 2, empire_plan: 3 };
+    const userLevel = tierLevels[profile.subscription_tier as keyof typeof tierLevels];
     const requiredLevel = tierLevels[requiredTier as keyof typeof tierLevels];
     
     return userLevel >= requiredLevel;
@@ -169,9 +175,9 @@ export const AppSidebar = () => {
           <div className="group-data-[collapsible=icon]:hidden">
             <h2 className="text-lg font-semibold text-sidebar-foreground">MobileSales Pro</h2>
             <Badge 
-              className={`${getTierColor(profile?.subscription_tier || 'basic')} text-white text-xs`}
+              className={`${getTierColor(profile?.subscription_tier || 'starter_kit')} text-white text-xs`}
             >
-              {profile?.subscription_tier?.toUpperCase() || 'BASIC'}
+              {profile?.subscription_tier ? profile.subscription_tier.toUpperCase().replace('_', ' ') : 'STARTER KIT'}
             </Badge>
           </div>
         </div>

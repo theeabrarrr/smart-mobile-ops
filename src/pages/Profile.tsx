@@ -41,14 +41,14 @@ const planFeatures = {
     'Purchase history',
     'Priority email support'
   ],
-  premium: [
-    'Everything in Standard',
-    'AI Business Assistant',
-    'Custom reports & insights',
-    'Predictive analytics',
-    'Smart recommendations',
-    'Advanced export options',
-    'Premium support (24/7)',
+  empire_plan: [
+    'Unlimited mobiles',
+    'Everything in Dealer Pack',
+    'Advanced analytics & charts',
+    'Stock alerts (low inventory)',
+    'Custom report exports (CSV/PDF)',
+    'Multi-branch support (coming soon)',
+    'Priority support (24/7)',
     'Early access to new features'
   ]
 };
@@ -220,18 +220,18 @@ export default function Profile() {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'basic': return 'bg-blue-500 text-white';
-      case 'standard': return 'bg-green-500 text-white';
-      case 'premium': return 'bg-purple-500 text-white';
+      case 'starter_kit': return 'bg-blue-500 text-white';
+      case 'dealer_pack': return 'bg-green-500 text-white';
+      case 'empire_plan': return 'bg-purple-500 text-white';
       default: return 'bg-gray-500 text-white';
     }
   };
 
   const getPlanIcon = (tier: string) => {
     switch (tier) {
-      case 'basic': return <User className="h-4 w-4" />;
-      case 'standard': return <Star className="h-4 w-4" />;
-      case 'premium': return <Crown className="h-4 w-4" />;
+      case 'starter_kit': return <User className="h-4 w-4" />;
+      case 'dealer_pack': return <Star className="h-4 w-4" />;
+      case 'empire_plan': return <Crown className="h-4 w-4" />;
       default: return <User className="h-4 w-4" />;
     }
   };
@@ -384,7 +384,7 @@ export default function Profile() {
       </Card>
 
       {/* Custom Reports for Premium Users */}
-      {profile?.subscription_tier === 'premium' && (
+      {profile?.subscription_tier === 'empire_plan' && (
         <CustomReports userSubscriptionTier={profile.subscription_tier} />
       )}
     </div>

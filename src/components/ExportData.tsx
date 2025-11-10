@@ -21,7 +21,7 @@ const ExportData = () => {
 
   const exportData = async () => {
     // Check subscription tier
-    if (!canAccessFeature(tier, 'export_data')) {
+    if (!canAccessFeature(tier, 'custom_reports')) {
       setShowUpgradeDialog(true);
       return;
     }
@@ -181,7 +181,7 @@ const ExportData = () => {
 
   const sendEmailSupport = () => {
     // Check subscription tier
-    if (!canAccessFeature(tier, 'email_support')) {
+    if (!canAccessFeature(tier, 'priority_support')) {
       setShowUpgradeDialog(true);
       return;
     }
@@ -209,8 +209,8 @@ Best regards`;
     });
   };
 
-  const hasExportAccess = canAccessFeature(tier, 'export_data');
-  const hasEmailAccess = canAccessFeature(tier, 'email_support');
+  const hasExportAccess = canAccessFeature(tier, 'custom_reports');
+  const hasEmailAccess = canAccessFeature(tier, 'priority_support');
 
   return (
     <>
@@ -280,7 +280,7 @@ Best regards`;
       <UpgradeDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
-        message={getUpgradeMessage(tier, 'export_data')}
+        message={getUpgradeMessage(tier, 'custom_reports')}
       />
     </>
   );

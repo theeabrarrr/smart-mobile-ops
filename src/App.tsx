@@ -13,6 +13,7 @@ import Customers from "./pages/Customers";
 import Inventory from "./pages/Inventory";
 import Sales from "./pages/Sales";
 import Purchases from "./pages/Purchases";
+import Expenses from "./pages/Expenses";
 import Reports from "./pages/Reports";
 import AIAssistant from "./pages/AIAssistant";
 import Profile from "./pages/Profile";
@@ -64,6 +65,11 @@ const App = () => (
             <Route path="/purchases" element={
               <DashboardLayout>
                 <Purchases />
+              </DashboardLayout>
+            } />
+            <Route path="/expenses" element={
+              <DashboardLayout>
+                <Expenses />
               </DashboardLayout>
             } />
             <Route path="/reports" element={

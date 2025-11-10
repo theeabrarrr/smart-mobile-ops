@@ -92,7 +92,7 @@ export default function AIAssistant() {
     if (!input.trim()) return;
 
     // Check subscription for premium features
-    if (!canAccessFeature(tier, 'ai_assistant')) {
+    if (!canAccessFeature(tier, 'advanced_analytics')) {
       setShowUpgradeDialog(true);
       return;
     }
@@ -141,7 +141,7 @@ export default function AIAssistant() {
     }
   };
 
-  const hasAccess = canAccessFeature(tier, 'ai_assistant');
+  const hasAccess = canAccessFeature(tier, 'advanced_analytics');
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -347,7 +347,7 @@ export default function AIAssistant() {
       <UpgradeDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
-        message={getUpgradeMessage(tier, 'ai_assistant')}
+        message={getUpgradeMessage(tier, 'advanced_analytics')}
       />
     </div>
   );
