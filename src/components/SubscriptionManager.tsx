@@ -9,7 +9,7 @@ import { Check, Star, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface SubscriptionManagerProps {
-  currentTier: 'basic' | 'standard' | 'premium';
+  currentTier: 'starter_kit' | 'dealer_pack' | 'empire_plan';
   onTierChange: () => void;
 }
 
@@ -24,46 +24,47 @@ interface Plan {
 }
 
 const planFeatures = {
-  basic: [
-    'Up to 20 mobiles only',
-    'Basic customer management',
-    'Simple sales tracking',
+  starter_kit: [
+    'Up to 50 mobiles per month',
+    'Basic inventory management',
+    'Simple sales & purchase tracking',
+    'Limited customer history',
     'Single user access',
     'Email support'
   ],
-  standard: [
-    'Unlimited inventory',
-    'Unlimited customers',
-    'Bulk import (CSV/Excel)',
-    'Advanced profit tracking',
-    'Detailed reports & analytics',
-    'CSV/Excel export',
-    'Seller tracking (CNIC/Phone)',
-    'Purchase history',
+  dealer_pack: [
+    'Up to 200 mobiles per month',
+    'Full inventory management',
+    'Expense tracker',
+    'Customer history tracking',
+    'Multi-user roles (Admin/Staff/Viewer)',
+    'Monthly profit-loss summary',
+    'Purchase & sales history',
+    'Auto data backup',
     'Priority email support'
   ],
-  premium: [
-    'Everything in Standard',
-    'AI Business Assistant',
-    'Custom reports & insights',
-    'Predictive analytics',
-    'Smart recommendations',
-    'Advanced export options',
-    'Premium support (24/7)',
+  empire_plan: [
+    'Unlimited mobiles',
+    'Everything in Dealer Pack',
+    'Advanced analytics & charts',
+    'Stock alerts (low inventory)',
+    'Custom report exports (CSV/PDF)',
+    'Multi-branch support (coming soon)',
+    'Priority support (24/7)',
     'Early access to new features'
   ]
 };
 
 const planColors = {
-  basic: 'bg-blue-500',
-  standard: 'bg-green-500',
-  premium: 'bg-purple-500'
+  starter_kit: 'bg-blue-500',
+  dealer_pack: 'bg-green-500',
+  empire_plan: 'bg-purple-500'
 };
 
 const planIcons = {
-  basic: Star,
-  standard: Crown,
-  premium: Crown
+  starter_kit: Star,
+  dealer_pack: Star,
+  empire_plan: Crown
 };
 
 export default function SubscriptionManager({ currentTier, onTierChange }: SubscriptionManagerProps) {
@@ -110,10 +111,10 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
   const handleUpgrade = async (planId: string) => {
     if (!user) return;
     
-    if (planId === 'basic') {
+    if (planId === 'starter_kit') {
       toast({
         title: "Error",
-        description: "Cannot downgrade to free plan. Please contact admin.",
+        description: "Cannot downgrade to starter kit. Please contact admin.",
         variant: "destructive"
       });
       return;
@@ -181,7 +182,7 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
           const Icon = plan.icon;
           const isCurrentPlan = currentTier === plan.id;
           const isUpgrade = plans.findIndex(p => p.id === currentTier) < plans.findIndex(p => p.id === plan.id);
-          const isMostPopular = plan.id === 'standard';
+          const isMostPopular = plan.id === 'dealer_pack';
           
           return (
             <Card 
@@ -215,9 +216,9 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
                   {plan.name}
                 </CardTitle>
                 <CardDescription className="text-sm text-muted-foreground mb-4">
-                  {plan.id === 'basic' && 'Perfect for trying out MobileSales Pro'}
-                  {plan.id === 'standard' && 'For professionals who track profits'}
-                  {plan.id === 'premium' && 'For teams that need to collaborate'}
+                  {plan.id === 'starter_kit' && 'Perfect for small mobile sellers'}
+                  {plan.id === 'dealer_pack' && 'For mid-level shop owners'}
+                  {plan.id === 'empire_plan' && 'For wholesalers & chains'}
                 </CardDescription>
                 <div className="mt-4">
                   <span className="text-4xl md:text-5xl font-bold text-foreground">
@@ -244,8 +245,8 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
                     disabled={!!processing}
                     variant={isUpgrade && isMostPopular ? "default" : isUpgrade ? "default" : "outline"}
                   >
-                    {processing === plan.id ? 'Processing...' : 
-                     plan.id === 'basic' ? 'Get Started' :
+                  {processing === plan.id ? 'Processing...' : 
+                     plan.id === 'starter_kit' ? 'Get Started' :
                      isUpgrade ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`}
                   </Button>
                 )}

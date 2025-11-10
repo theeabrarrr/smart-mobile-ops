@@ -12,16 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import CustomReports from '@/components/CustomReports';
 import { profileSchema } from '@/lib/validationSchemas';
 import { useNavigate } from 'react-router-dom';
-
-interface Profile {
-  id: string;
-  full_name: string;
-  business_name?: string;
-  phone?: string;
-  address?: string;
-  subscription_tier: 'basic' | 'standard' | 'premium';
-  subscription_expires_at?: string;
-}
+import { Profile as ProfileType } from '@/types/profile';
 
 interface SubscriptionPlan {
   id: string;
@@ -66,7 +57,7 @@ export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<ProfileType | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);

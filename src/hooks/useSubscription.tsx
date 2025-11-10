@@ -1,29 +1,29 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { SubscriptionTier } from '@/lib/subscriptionTiers';
-
-// Map database tiers to app tiers
-const mapDatabaseTier = (tier: string): SubscriptionTier => {
-  if (tier === 'basic') return 'free';
-  return tier as SubscriptionTier;
-};
+import { SubscriptionTier, TIER_LIMITS } from '@/lib/subscriptionTiers';
 
 interface SubscriptionFeatures {
   canAddMoreMobiles: (currentCount: number) => boolean;
-  canAccessProfitTracking: boolean;
-  canExportData: boolean;
-  canAccessReports: boolean;
-  canAccessAI: boolean;
-  canAccessBulkPurchase: boolean;
+  canAccessExpenseTracker: boolean;
+  canAccessCustomerHistory: boolean;
+  canAccessMultiUserRoles: boolean;
+  canAccessProfitLossSummary: boolean;
+  canAccessAdvancedAnalytics: boolean;
+  canAccessStockAlerts: boolean;
   canAccessCustomReports: boolean;
+  canAccessMultiBranch: boolean;
+  canAccessPrioritySupport: boolean;
+  // Legacy feature names for backward compatibility
+  canAccessProfitTracking: boolean;
+  canAccessReports: boolean;
   canTrackSellerInfo: boolean;
   maxMobiles: number | null;
 }
 
 export const useSubscription = () => {
   const { user } = useAuth();
-  const [tier, setTier] = useState<SubscriptionTier>('free');
+  const [tier, setTier] = useState<SubscriptionTier>('starter_kit');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export const useSubscription = () => {
         .single();
 
       if (data) {
-        setTier(mapDatabaseTier(data.subscription_tier));
+        setTier(data.subscription_tier as SubscriptionTier);
       }
       setLoading(false);
     };
@@ -50,17 +50,24 @@ export const useSubscription = () => {
 
   const features: SubscriptionFeatures = {
     canAddMoreMobiles: (currentCount: number) => {
-      if (tier === 'free') return currentCount < 20;
-      return true; // standard and premium have unlimited
+      const limit = TIER_LIMITS[tier];
+      if (limit === null) return true; // unlimited
+      return currentCount < limit;
     },
-    canAccessProfitTracking: tier === 'standard' || tier === 'premium',
-    canExportData: tier === 'standard' || tier === 'premium',
-    canAccessReports: tier === 'standard' || tier === 'premium',
-    canAccessAI: tier === 'premium',
-    canAccessBulkPurchase: tier === 'premium',
-    canAccessCustomReports: tier === 'premium',
-    canTrackSellerInfo: tier === 'standard' || tier === 'premium',
-    maxMobiles: tier === 'free' ? 20 : null,
+    canAccessExpenseTracker: tier === 'dealer_pack' || tier === 'empire_plan',
+    canAccessCustomerHistory: tier === 'dealer_pack' || tier === 'empire_plan',
+    canAccessMultiUserRoles: tier === 'dealer_pack' || tier === 'empire_plan',
+    canAccessProfitLossSummary: tier === 'dealer_pack' || tier === 'empire_plan',
+    canAccessAdvancedAnalytics: tier === 'empire_plan',
+    canAccessStockAlerts: tier === 'empire_plan',
+    canAccessCustomReports: tier === 'empire_plan',
+    canAccessMultiBranch: tier === 'empire_plan',
+    canAccessPrioritySupport: tier === 'empire_plan',
+    // Legacy features for backward compatibility
+    canAccessProfitTracking: tier === 'dealer_pack' || tier === 'empire_plan',
+    canAccessReports: tier === 'dealer_pack' || tier === 'empire_plan',
+    canTrackSellerInfo: tier === 'dealer_pack' || tier === 'empire_plan',
+    maxMobiles: TIER_LIMITS[tier],
   };
 
   return {

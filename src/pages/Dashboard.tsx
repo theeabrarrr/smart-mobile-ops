@@ -8,13 +8,7 @@ import ExportData from '@/components/ExportData';
 import { useSubscription } from '@/hooks/useSubscription';
 import { sanitizeError } from '@/lib/errorHandling';
 import { useToast } from '@/hooks/use-toast';
-
-interface Profile {
-  id: string;
-  full_name: string;
-  business_name?: string;
-  subscription_tier: 'basic' | 'standard' | 'premium';
-}
+import { Profile } from '@/types/profile';
 
 interface DashboardStats {
   totalCustomers: number;
@@ -72,7 +66,7 @@ const Dashboard = () => {
         .insert([{
           user_id: user.id,
           full_name: user.email || 'User',
-          subscription_tier: 'basic'
+          subscription_tier: 'starter_kit'
         }])
         .select()
         .single();
@@ -250,7 +244,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {features.canAccessProfitTracking && (
+        {features.canAccessProfitLossSummary && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -284,16 +278,16 @@ const Dashboard = () => {
             <div className="text-sm">• Register mobile device</div>
             <div className="text-sm">• Record new sale</div>
             <div className="text-sm">• Track purchase</div>
-            {profile?.subscription_tier !== 'basic' && (
+            {profile?.subscription_tier !== 'starter_kit' && (
               <>
-                <div className="text-sm text-green-600">• Export data (Standard+)</div>
-                <div className="text-sm text-green-600">• Email support (Standard+)</div>
+                <div className="text-sm text-green-600">• Expense Tracker (Dealer Pack+)</div>
+                <div className="text-sm text-green-600">• Customer History (Dealer Pack+)</div>
               </>
             )}
-            {profile?.subscription_tier === 'premium' && (
+            {profile?.subscription_tier === 'empire_plan' && (
               <>
-                <div className="text-sm text-purple-600">• AI Assistant with Roman Urdu (Premium)</div>
-                <div className="text-sm text-purple-600">• Custom reports (Premium)</div>
+                <div className="text-sm text-purple-600">• Advanced Analytics (Empire Plan)</div>
+                <div className="text-sm text-purple-600">• Custom Reports (Empire Plan)</div>
               </>
             )}
           </CardContent>
@@ -303,31 +297,31 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle>Subscription Benefits</CardTitle>
             <CardDescription>
-              Your current plan: {profile?.subscription_tier?.toUpperCase() || 'BASIC'}
+              Your current plan: {profile?.subscription_tier ? profile.subscription_tier.toUpperCase().replace('_', ' ') : 'STARTER KIT'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="text-sm">✓ Customer management</div>
-            <div className="text-sm">✓ Basic inventory (Free: 20 limit)</div>
+            <div className="text-sm">✓ Basic inventory (Starter: 50 limit)</div>
             <div className="text-sm">✓ Sales tracking</div>
-            {features.canAccessProfitTracking ? (
+            {features.canAccessProfitLossSummary ? (
               <>
-                <div className="text-sm text-green-600">✓ Unlimited inventory</div>
-                <div className="text-sm text-green-600">✓ Profit tracking</div>
-                <div className="text-sm text-green-600">✓ Seller CNIC & Phone</div>
-                <div className="text-sm text-green-600">✓ Reports & CSV export</div>
+                <div className="text-sm text-green-600">✓ Up to 200 mobiles (Dealer Pack)</div>
+                <div className="text-sm text-green-600">✓ Expense Tracker</div>
+                <div className="text-sm text-green-600">✓ Customer History</div>
+                <div className="text-sm text-green-600">✓ Multi-user Roles</div>
               </>
             ) : (
               <>
-                <div className="text-sm text-muted-foreground">✗ Unlimited inventory</div>
-                <div className="text-sm text-muted-foreground">✗ Profit tracking</div>
-                <div className="text-sm text-muted-foreground">✗ Reports & CSV export</div>
+                <div className="text-sm text-muted-foreground">✗ Expense Tracker</div>
+                <div className="text-sm text-muted-foreground">✗ Multi-user Roles</div>
+                <div className="text-sm text-muted-foreground">✗ Customer History</div>
               </>
             )}
-            {features.canAccessAI ? (
+            {features.canAccessAdvancedAnalytics ? (
               <>
-                <div className="text-sm text-purple-600">✓ AI Assistant</div>
-                <div className="text-sm text-purple-600">✓ Bulk Purchase</div>
+                <div className="text-sm text-purple-600">✓ Advanced Analytics</div>
+                <div className="text-sm text-purple-600">✓ Stock Alerts</div>
                 <div className="text-sm text-purple-600">✓ Custom Reports</div>
               </>
             ) : (

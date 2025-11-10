@@ -75,7 +75,7 @@ export default function SubscriptionManager() {
       const { error } = await supabase
         .from('profiles')
         .update({
-          subscription_tier: newTier as 'basic' | 'standard' | 'premium',
+          subscription_tier: newTier as 'starter_kit' | 'dealer_pack' | 'empire_plan',
           subscription_expires_at: expiryDate || null,
           updated_at: new Date().toISOString(),
         })
@@ -178,9 +178,9 @@ export default function SubscriptionManager() {
                 <SelectValue placeholder="Choose new tier" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="basic">Free (Basic)</SelectItem>
-                <SelectItem value="standard">Standard</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
+                <SelectItem value="starter_kit">Starter Kit</SelectItem>
+                <SelectItem value="dealer_pack">Dealer Pack</SelectItem>
+                <SelectItem value="empire_plan">Empire Plan</SelectItem>
               </SelectContent>
             </Select>
           </div>

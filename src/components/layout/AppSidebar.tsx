@@ -29,10 +29,7 @@ import {
   Receipt
 } from 'lucide-react';
 import { useAdminRole } from '@/hooks/useAdminRole';
-
-interface Profile {
-  subscription_tier: 'basic' | 'standard' | 'premium';
-}
+import { Profile } from '@/types/profile';
 
 export const AppSidebar = () => {
   const { user, signOut } = useAuth();

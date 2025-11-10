@@ -21,7 +21,7 @@ export const ExpiryWarningBanner = () => {
         .eq('user_id', user.id)
         .single();
 
-      if (data?.subscription_expires_at && data.subscription_tier !== 'basic') {
+      if (data?.subscription_expires_at && data.subscription_tier !== 'starter_kit') {
         const expiryDate = new Date(data.subscription_expires_at);
         const now = new Date();
         const diffTime = expiryDate.getTime() - now.getTime();

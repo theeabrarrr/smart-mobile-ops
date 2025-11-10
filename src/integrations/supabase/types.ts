@@ -50,6 +50,39 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string | null
+          expense_date: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount: number
@@ -418,6 +451,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_tier_mobile_limit: { Args: { _user_id: string }; Returns: number }
       get_user_mobile_count: { Args: { _user_id: string }; Returns: number }
       get_users_with_low_stock: {
         Args: never
@@ -445,7 +479,7 @@ export type Database = {
       invoice_status: "UNPAID" | "PAID" | "EXPIRED"
       mobile_condition: "new" | "excellent" | "good" | "fair" | "poor"
       payment_status: "pending" | "paid" | "partial" | "cancelled"
-      subscription_tier: "basic" | "standard" | "premium"
+      subscription_tier: "starter_kit" | "dealer_pack" | "empire_plan"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -577,7 +611,7 @@ export const Constants = {
       invoice_status: ["UNPAID", "PAID", "EXPIRED"],
       mobile_condition: ["new", "excellent", "good", "fair", "poor"],
       payment_status: ["pending", "paid", "partial", "cancelled"],
-      subscription_tier: ["basic", "standard", "premium"],
+      subscription_tier: ["starter_kit", "dealer_pack", "empire_plan"],
     },
   },
 } as const
