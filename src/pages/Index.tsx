@@ -214,43 +214,35 @@ const Index = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            {/* Free Plan */}
+            {/* Starter Kit */}
             <Card className="relative border-2 hover:shadow-xl transition-all">
               <CardHeader>
-                <CardTitle className="text-2xl">Free (Starter)</CardTitle>
+                <CardTitle className="text-2xl">Starter Kit</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">Free</span>
-                  <span className="text-muted-foreground"> forever</span>
+                  <span className="text-4xl font-bold">FREE</span>
+                  <span className="text-muted-foreground"> PKR 0/month</span>
                 </div>
                 <CardDescription className="text-base mt-2">
-                  Perfect for small sellers or demo users
+                  Ideal for small mobile sellers
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Up to 20 mobiles</span>
+                    <span className="text-sm">Basic sales, purchase & inventory management</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Unlimited customers</span>
+                    <span className="text-sm">Limit: 50 mobiles/month</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Basic sales & purchase tracking</span>
+                    <span className="text-sm">Single user access</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
                     <span className="text-sm">Simple dashboard</span>
-                  </li>
-                  <li className="flex items-start gap-2 opacity-50">
-                    <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm line-through">Profit tracking</span>
-                  </li>
-                  <li className="flex items-start gap-2 opacity-50">
-                    <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm line-through">Reports & analytics</span>
                   </li>
                 </ul>
                 <Button onClick={handleGetStarted} variant="outline" className="w-full">
@@ -259,7 +251,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* Standard Plan */}
+            {/* Dealer Pack */}
             <Card className="relative border-2 border-primary shadow-xl scale-105 md:scale-110 z-10">
               <div className="absolute -top-4 left-0 right-0 flex justify-center">
                 <Badge className="bg-primary text-primary-foreground px-4 py-1">
@@ -268,40 +260,44 @@ const Index = () => {
                 </Badge>
               </div>
               <CardHeader>
-                <CardTitle className="text-2xl">Standard (Professional)</CardTitle>
+                <CardTitle className="text-2xl">Dealer Pack</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">PKR 899</span>
+                  <span className="text-4xl font-bold">PKR 600</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
                 <CardDescription className="text-base mt-2">
-                  Best for shop owners who want profit tracking
+                  Best for mid-level shop owners
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">Unlimited inventory</span>
+                    <span className="text-sm font-medium">All Starter Kit features</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">Profit tracking per sale</span>
+                    <span className="text-sm font-medium">Limit: 200 mobiles/month</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">Full reports & analytics</span>
+                    <span className="text-sm font-medium">Expense tracker</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">CSV data export</span>
+                    <span className="text-sm font-medium">Customer history</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">CNIC & phone tracking</span>
+                    <span className="text-sm font-medium">Multi-user roles (Admin, Staff, Viewer)</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">Email support</span>
+                    <span className="text-sm font-medium">Monthly profit-loss summary</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
+                    <span className="text-sm font-medium">Smart notifications for due payments or low stock</span>
                   </li>
                 </ul>
                 <Button onClick={handleGetStarted} className="w-full">
@@ -310,43 +306,51 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* Premium Plan */}
+            {/* Empire Plan */}
             <Card className="relative border-2 border-accent/50 hover:shadow-xl transition-all">
               <CardHeader>
-                <CardTitle className="text-2xl">Premium (Business Intelligence)</CardTitle>
+                <CardTitle className="text-2xl">Empire Plan</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">PKR 1,499</span>
+                  <span className="text-4xl font-bold">PKR 1,500</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
                 <CardDescription className="text-base mt-2">
-                  For large-scale sellers & advanced analytics
+                  For wholesalers & chain owners
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">Everything in Standard</span>
+                    <span className="text-sm font-medium">Unlimited mobiles</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
+                    <span className="text-sm font-medium">Everything in Dealer Pack</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Sparkles className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">AI Business Assistant (Roman Urdu)</span>
+                    <span className="text-sm font-medium">Advanced analytics & visual reports</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">Bulk stock purchase</span>
+                    <span className="text-sm font-medium">Stock alerts (low inventory)</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">Custom date-range reports</span>
+                    <span className="text-sm font-medium">Custom report exports (CSV/PDF)</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">Advanced analytics</span>
+                    <span className="text-sm font-medium">Multi-branch support (coming soon)</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-medium">Priority support</span>
+                    <span className="text-sm font-medium">Priority support (24/7)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
+                    <span className="text-sm font-medium">Early access to new features</span>
                   </li>
                 </ul>
                 <Button onClick={handleGetStarted} variant="default" className="w-full bg-accent hover:bg-accent/90">
