@@ -222,9 +222,9 @@ export default function SubscriptionManager({ currentTier, onTierChange }: Subsc
                 </CardDescription>
                 <div className="mt-4">
                   <span className="text-4xl md:text-5xl font-bold text-foreground">
-                    {plan.price === 0 ? 'PKR 0' : `PKR ${plan.price.toLocaleString()}`}
+                    {plan.price === 0 ? 'Free' : `PKR ${plan.price.toLocaleString()}`}
                   </span>
-                  <span className="text-muted-foreground text-sm ml-1">/month</span>
+                  {plan.price !== 0 && <span className="text-muted-foreground text-sm ml-1">/month</span>}
                 </div>
               </CardHeader>
               

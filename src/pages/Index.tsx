@@ -219,8 +219,7 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="text-2xl">Starter Kit</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">FREE</span>
-                  <span className="text-muted-foreground"> PKR 0/month</span>
+                  <span className="text-4xl font-bold">Free</span>
                 </div>
                 <CardDescription className="text-base mt-2">
                   Ideal for small mobile sellers
@@ -262,7 +261,7 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="text-2xl">Dealer Pack</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">PKR 2,999</span>
+                  <span className="text-4xl font-bold">PKR 600</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
                 <CardDescription className="text-base mt-2">
@@ -311,7 +310,7 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="text-2xl">Empire Plan</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">PKR 9,999</span>
+                  <span className="text-4xl font-bold">PKR 1,500</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
                 <CardDescription className="text-base mt-2">

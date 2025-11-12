@@ -350,10 +350,10 @@ export default function Profile() {
                     {getPlanIcon(plan.id)}
                     {plan.name}
                   </CardTitle>
-                  <div className="text-2xl font-bold">{plan.price === 0 ? 'Free' : `PKR ${plan.price.toLocaleString()}/month`}</div>
-                  {plan.id !== 'basic' && (
-                    <p className="text-sm text-muted-foreground">per month</p>
-                  )}
+                  <div className="text-2xl font-bold">
+                    {plan.price === 0 ? 'Free' : `PKR ${plan.price.toLocaleString()}`}
+                    {plan.price !== 0 && <span className="text-sm text-muted-foreground ml-1">/month</span>}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 mb-4">
