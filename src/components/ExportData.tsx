@@ -220,7 +220,9 @@ Best regards`;
           <CardDescription>
             Export your data or contact support
             {hasExportAccess && (
-              <Badge variant="outline" className="ml-2">Dealer Pack+</Badge>
+              <Badge variant="outline" className="ml-2">
+                {tier === 'empire_plan' ? 'Empire Plan' : 'Dealer Pack+'}
+              </Badge>
             )}
           </CardDescription>
         </CardHeader>
