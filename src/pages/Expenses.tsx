@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -119,7 +119,6 @@ export default function Expenses() {
 
   if (!features.canAccessExpenseTracker) {
     return (
-      <DashboardLayout>
         <div className="space-y-4 md:space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
@@ -147,12 +146,11 @@ export default function Expenses() {
             message="Upgrade to Dealer Pack or Empire Plan to track your business expenses and view profit-loss summaries."
           />
         </div>
-      </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
+    
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -262,6 +260,6 @@ export default function Expenses() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    
   );
 }
