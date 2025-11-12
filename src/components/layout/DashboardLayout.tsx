@@ -39,6 +39,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       case '/inventory': return 'Mobile Inventory';
       case '/sales': return 'Sales';
       case '/purchases': return 'Purchases';
+      case '/expenses': return 'Expenses';
       case '/reports': return 'Reports';
       case '/ai-assistant': return 'AI Assistant';
       case '/profile': return 'Profile';
@@ -51,25 +52,25 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <SidebarInset>
-          <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 bg-background border-b">
-            <div className="flex items-center gap-2 px-4 flex-1">
+          <header className="sticky top-0 z-40 flex h-14 md:h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 bg-background border-b">
+            <div className="flex items-center gap-2 px-2 md:px-4 flex-1 min-w-0">
               <SidebarTrigger className="-ml-1" />
-              <Separator orientation="vertical" className="mr-2 h-4" />
-              <Breadcrumb>
+              <Separator orientation="vertical" className="mr-2 h-4 hidden sm:block" />
+              <Breadcrumb className="hidden sm:block">
                 <BreadcrumbList>
-                  <BreadcrumbItem>
+                  <BreadcrumbItem className="hidden md:block">
                     <BreadcrumbLink href="/dashboard">
                       MobileSales Pro
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbSeparator />
+                  <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
                     <BreadcrumbPage>{getPageTitle()}</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
-            <div className="flex items-center gap-2 px-4">
+            <div className="flex items-center gap-2 px-2 md:px-4">
               <NotificationBell />
               <ThemeToggle />
             </div>
