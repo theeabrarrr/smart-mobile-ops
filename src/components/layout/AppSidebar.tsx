@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -39,12 +40,20 @@ export const AppSidebar = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const { isAdmin } = useAdminRole();
   const { role } = useUserRole();
+  const { setOpenMobile, isMobile } = useSidebar();
 
   useEffect(() => {
     if (user) {
       fetchProfile();
     }
   }, [user]);
+
+  // Close mobile sidebar on navigation
+  useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [location.pathname, isMobile, setOpenMobile]);
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -191,7 +200,7 @@ export const AppSidebar = () => {
           <div className="group-data-[collapsible=icon]:hidden">
             <h2 className="text-lg font-semibold text-sidebar-foreground">MobileSales Pro</h2>
             <div className="flex gap-2 flex-wrap">
-              <Badge 
+              <Badge
                 className={`${getTierColor(profile?.subscription_tier || 'starter_kit')} text-white text-xs`}
               >
                 {profile?.subscription_tier ? profile.subscription_tier.toUpperCase().replace('_', ' ') : 'STARTER KIT'}

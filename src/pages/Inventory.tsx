@@ -408,12 +408,13 @@ export default function Inventory() {
                   <Smartphone className="h-5 w-5" />
                   <span>{mobile.brand} {mobile.model}</span>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1 flex-shrink-0">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => openEditDialog(mobile)}
                     disabled={mobile.is_sold || isReadOnly()}
+                    className="px-2"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -422,6 +423,7 @@ export default function Inventory() {
                     size="sm"
                     onClick={() => handleDelete(mobile.id)}
                     disabled={isReadOnly()}
+                    className="px-2"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

@@ -185,7 +185,9 @@ const Dashboard = () => {
           <Badge 
             className={`${getTierColor(profile?.subscription_tier || 'basic')} text-white px-3 py-1`}
           >
-            {profile?.subscription_tier?.toUpperCase() || 'BASIC'} PLAN
+            {profile?.subscription_tier === 'starter_kit' ? 'Starter Kit' :
+             profile?.subscription_tier === 'dealer_pack' ? 'Dealer Pack' :
+             profile?.subscription_tier === 'empire_plan' ? 'Empire Plan' : 'Basic'}
           </Badge>
         </div>
       </div>
@@ -248,7 +250,7 @@ const Dashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Profit <Badge variant="outline" className="ml-2">Dealer Pack+</Badge>
+                Total Profit <Badge variant="outline" className="ml-2">{profile?.subscription_tier === 'empire_plan' ? 'Empire Plan' : 'Dealer Pack+'}</Badge>
               </CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -280,8 +282,8 @@ const Dashboard = () => {
             <div className="text-sm">• Track purchase</div>
             {profile?.subscription_tier !== 'starter_kit' && (
               <>
-                <div className="text-sm text-green-600">• Expense Tracker (Dealer Pack+)</div>
-                <div className="text-sm text-green-600">• Customer History (Dealer Pack+)</div>
+                <div className="text-sm text-green-600">• Expense Tracker ({profile?.subscription_tier === 'empire_plan' ? 'Empire Plan' : 'Dealer Pack+'})</div>
+                <div className="text-sm text-green-600">• Customer History ({profile?.subscription_tier === 'empire_plan' ? 'Empire Plan' : 'Dealer Pack+'})</div>
               </>
             )}
             {profile?.subscription_tier === 'empire_plan' && (
